@@ -114,8 +114,11 @@ DEF section rules:
 
 ### Structure
 - **Parsing and code generation are a single pass.** The compiler never builds a syntax tree. It reads text and emits bytecode opcodes into `BytecodeExp` straight away: 938 distinct `OC_*` opcodes and roughly 800 `append` calls.
-- `expValue` (`compiler.go:1272–5323`) is one `switch` of **1047 `case`s**, one per trigger or trigger variant. Each case emits opcodes.
-- `scmap` (`compiler.go:36`) maps **435 state controller names** to their compile functions in `compiler_functions.go`.
+- `expValue` (`compiler.go:1272–5323`) is one big `switch c.token` with **about 280 trigger cases**. Inside them are nested `switch`es for keyword arguments such as `gethitvar(damage)`, about 1000 `case`s in total. Each case emits opcodes.
+- `scmap` (`compiler.go:36`) maps **159 state controller names** to their compile functions in `compiler_functions.go`: 91 MUGEN and 68 Ikemen.
+- `triggerMap` (`compiler.go:203`) lists 276 trigger names: 13 redirections, 142 MUGEN and 121 Ikemen.
+
+*Correction (2026-11-19): an earlier version of this audit said 435 controllers and 1047 trigger cases. Those counts mixed `scmap` with `triggerMap`, and top-level cases with nested ones. The numbers above come from `tools/schemagen`.*
 - The output types (`StateBytecode`, `StateControllerBase`, `BytecodeExp`) are defined in `bytecode.go`, and their `Run` methods operate on `*Char`. So the output only means something inside the running engine.
 - Coupling to engine globals:
   - `compiler.go` has 102 `sys.*` references, mostly `sys.ignoreMostErrors` (44) and `sys.cgi` (26).
@@ -153,5 +156,18 @@ It never needs bytecode. The compiler offers none of the first four: no tree, no
    - Trigger names come from the `case` labels of `expValue`.
    - Output: `lsp/schema/*.json`. The generator is re-run when the pinned version changes, so the editor follows the engine without hand-maintained lists. Hover docs are written by hand on top of this.
 3. **Fidelity oracle** (later, optional): a test harness that copies `ikemen/source/src` into a temp dir, adds a `_test.go` that calls `newCharCompiler().Compile`, and checks that our parser accepts exactly what Ikemen accepts on the corpus and on fuzzed snippets. This needs the cgo toolchain, so it runs in CI on Linux only.
+
+### Status: schema generated (2026-11-19)
+
+`tools/schemagen` writes `lsp/schema/ikemen.json` (~250 KB):
+- 159 controllers with 2065 parameters. Parameters come with name, type and count from `VT_*` when known, and the mandatory flag.
+- 284 triggers with 571 keywords.
+
+The generator follows helper calls such as `paramTrans(prefix)` and `hitDefSub`, with string arguments bound, and expands `range []string{…}` loops.
+
+Known gaps, which are listed in the JSON:
+- 18 parameter names are dynamic by design: `varset var(N)=`, `mapset` keys, `helper` size keys, `dialogue textN`.
+- `projcontact`, `projguarded` and `projhit` have no `case`. They are matched by prefix (`projcontact1234`, the legacy ID suffix) in `expValue`'s default branch.
+- 8 triggers are accepted by `expValue` but are not in `triggerMap` (`statetime`, `hitdefvar`, `debugmode`…). They are marked `origin: "other"`.
 
 **Effort:** DEF ~1 day. schemagen ~2–3 days. CNS parser + expressions ~1–2 weeks. ZSS blocks +1 week. CMD (`input.go` `ReadCommandSymbols`) has not been audited yet.

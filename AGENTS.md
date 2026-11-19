@@ -10,8 +10,9 @@ This file is the hub. Each fact lives in one file only, and the others link to i
 |---|---|---|
 | [app/](app/AGENTS.md) | Wails v3 desktop app (Go services + Svelte/TS) | UI ↔ core boundary |
 | [formats/](formats/AGENTS.md) | `katafighter-formats`: file readers/writers | Extraction rules, parsing rules |
-| [lsp/](lsp/AGENTS.md) | `katafighter-lsp`: language server | Schema-as-data |
+| [lsp/](lsp/AGENTS.md) | `katafighter-lsp`: language server | `schema/` (generated) |
 | [vscode-extension/](vscode-extension/AGENTS.md) | VS Code client for the LSP | — |
+| [tools/](tools/AGENTS.md) | Build-time generators (`schemagen`) | Generating `lsp/schema` from Ikemen source |
 | [docs/](docs/AGENTS.md) | Plan, audit, design notes | Vision, roadmap, upstream audit |
 | [ikemen/](ikemen/AGENTS.md) | Ikemen GO source (submodule) + release builds | Pinned engine version, test corpus |
 
@@ -21,6 +22,8 @@ This file is the hub. Each fact lives in one file only, and the others link to i
 app ──► formats ◄── lsp ◄── vscode-extension
            ▲
            └── code is copied from ikemen/source (never imported)
+
+ikemen/source ◄──reads── tools/schemagen ──writes──► lsp/schema/ikemen.json
 ```
 
 ## Global rules

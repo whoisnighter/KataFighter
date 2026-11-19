@@ -6,7 +6,7 @@ Read-only reference. Nothing here is built or imported.
 
 ## Pinned version (owned here)
 
-**Ikemen GO v1.0.0**, commit `81c6da71d689625e20db79586815b695da00dd6d`. To bump it, check out a new tag in `source/`, update this section, then re-audit.
+**Ikemen GO v1.0.0**, commit `81c6da71d689625e20db79586815b695da00dd6d`. To bump it: check out a new tag in `source/`, update this section, re-run [schemagen](../tools/AGENTS.md), then re-audit.
 
 ## source/
 
