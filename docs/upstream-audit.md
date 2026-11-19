@@ -91,4 +91,67 @@ Verified:
 
 Not yet: an AIR writer (lossless round-trip, Phase 4).
 
-Next to audit: DEF / CNS / ZSS (`char.go`, `compiler.go`).
+## DEF and the CNS constant sections (`char.go:3747–4385`, `common.go`)
+
+`Char.load` reads the DEF, then the `[Data]`, `[Size]`, `[Velocity]`, `[Movement]`, `[Quotes]`, `[Constants]` and `[RemapPreset X]` sections of the CNS file, writing straight into engine state (`sys.cgi`, `Char`). The parsing mechanics underneath are small and pure:
+
+| Function | Where | Notes |
+|---|---|---|
+| `ReadIniSection`, `IniSection.Parse` | `common.go:947`, `:964` | Keys are lower-cased. **The first key wins** inside a section. `key value` with no `=` gives an empty value. `;` starts a comment. |
+| `IniSection.ReadI32` / `ReadF32` / `ReadBool` / `getText` | `common.go:995–1142` | Comma lists; an empty item leaves the default unchanged; `getText` requires quotes |
+| `SearchFile`, `LoadFile` | `common.go:539`, `:651` | Search order: the DEF's directory, then `""`, then `data/`. Accepts `\` and quotes. Supports zip paths. Case-insensitive fallback |
+| `decodeShiftJIS` | `common.go:433` | Values that are not valid UTF-8 are decoded as Shift_JIS (needs `golang.org/x/text`) |
+
+DEF section rules:
+- **The first section of each kind wins.** A `<language>.info`-style section overrides the default once.
+- In `[Files]`, `st`, `st1`…`stN` are sorted naturally. `cmd` and `stcommon` are read by `Compile` (`compiler.go:8129`), not by `Char.load`.
+- `pal1..palN`, `fontN` and `fontN.height` live in `[Files]`. `[Palette Keymap]` maps `a`..`z2` to palette slots.
+- Common files (`common.air`, `.cmd`, `.const`, `stcommon`) come from `sys.cfg.Common.*`, i.e. Ikemen's config, not from the character.
+
+**Verdict: easy.** Port the INI helpers into `internal/text` and build a `def` package that returns a plain struct (info, files, palettes, keymap) plus the CNS constant sections. ~1 day.
+
+## CNS / ZSS / CMD compiler (`compiler.go` 8.4k, `compiler_functions.go` 7.1k, `bytecode.go` 15.6k lines)
+
+### Structure
+- **Parsing and code generation are a single pass.** The compiler never builds a syntax tree. It reads text and emits bytecode opcodes into `BytecodeExp` straight away: 938 distinct `OC_*` opcodes and roughly 800 `append` calls.
+- `expValue` (`compiler.go:1272–5323`) is one `switch` of **1047 `case`s**, one per trigger or trigger variant. Each case emits opcodes.
+- `scmap` (`compiler.go:36`) maps **435 state controller names** to their compile functions in `compiler_functions.go`.
+- The output types (`StateBytecode`, `StateControllerBase`, `BytecodeExp`) are defined in `bytecode.go`, and their `Run` methods operate on `*Char`. So the output only means something inside the running engine.
+- Coupling to engine globals:
+  - `compiler.go` has 102 `sys.*` references, mostly `sys.ignoreMostErrors` (44) and `sys.cgi` (26).
+  - `compiler_functions.go` has 24.
+  - `Compile` also creates the player's `CommandList` (CMD), so it is tied to `input.go`.
+- CNS and ZSS share the expression compiler and the controller table. ZSS adds a block parser (`stateBlock`, `subBlock`, `switchBlock`, `loopBlock`, `callFunc`, `letAssign`: `compiler.go:7366–7965`) and is strict: `ignoreMostErrors` is forced to false.
+
+### Expression grammar (precedence, loosest first)
+`||` → `^^` → `&&` → `|` → `^` → `&` → `=` `!=` (and `= [a,b]` / `(a,b)` ranges) → `<` `<=` `>` `>=` → `+` `-` → `*` `/` `%` → `**` → unary `!` `~` `-` → values and triggers (`expValue`). Tokenizer: `compiler.go:485–675`.
+
+### What the editor needs
+The editor needs these things:
+- A syntax tree with source positions.
+- Diagnostics.
+- Completion and hover.
+- Go-to-definition.
+- Lossless round-trip.
+
+It never needs bytecode. The compiler offers none of the first four: no tree, no positions beyond a line index, and errors are free-form strings.
+
+### Options considered
+| Option | Verdict |
+|---|---|
+| A. Copy the compiler (with `bytecode.go`) | ❌ 31k lines. The output is runtime structs bound to `*Char`. We would carry the engine and still have no syntax tree. |
+| B. Build Ikemen as a library | ❌ It is all `package main` and needs cgo (SDL2, OpenGL/Vulkan, FFmpeg). |
+| **C. Own parser + generated schema + oracle** | ✅ Recommended (see below) |
+
+### Recommended strategy (C)
+1. **Own parser** (`formats/cns`, `formats/zss`): a tolerant parser that builds a syntax tree and keeps positions, comments and trivia, so files round-trip.
+   - Use `internal/text` for numbers and INI rules.
+   - Port the tokenizer and the precedence chain above as they are, since they are small and pure, but build tree nodes instead of opcodes.
+2. **Generated schema** (`tools/schemagen`, a `go/ast` program run against `ikemen/source`):
+   - State controller names come from `scmap`.
+   - Their parameter names come from the string literals in `paramValue`, `stateParam` and `param*` calls. There are 33 + 158 + 28 call sites, and most give the mandatory flag. `paramValue` also gives type and count.
+   - Trigger names come from the `case` labels of `expValue`.
+   - Output: `lsp/schema/*.json`. The generator is re-run when the pinned version changes, so the editor follows the engine without hand-maintained lists. Hover docs are written by hand on top of this.
+3. **Fidelity oracle** (later, optional): a test harness that copies `ikemen/source/src` into a temp dir, adds a `_test.go` that calls `newCharCompiler().Compile`, and checks that our parser accepts exactly what Ikemen accepts on the corpus and on fuzzed snippets. This needs the cgo toolchain, so it runs in CI on Linux only.
+
+**Effort:** DEF ~1 day. schemagen ~2–3 days. CNS parser + expressions ~1–2 weeks. ZSS blocks +1 week. CMD (`input.go` `ReadCommandSymbols`) has not been audited yet.

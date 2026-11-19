@@ -124,6 +124,8 @@ Plan:
 4. **Track upstream**: record the Ikemen GO commit each package was extracted from; add a script to diff against newer upstream versions.
 5. **Upstream proposal**: open a discussion with the Ikemen GO team about turning the extracted module into a shared library used by both projects.
 
+**Exception: CNS / ZSS / CMD.** Ikemen's compiler parses and emits runtime bytecode in a single pass, with no syntax tree. We write our own tolerant parser instead, and generate the controller, parameter and trigger schema from Ikemen's source with `go/ast`. The reasoning is in [upstream-audit.md](upstream-audit.md#cns--zss--cmd-compiler-compilergo-84k-compiler_functionsgo-71k-bytecodego-156k-lines).
+
 ---
 
 ## 6. Feature Scope by Format
