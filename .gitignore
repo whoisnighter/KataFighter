@@ -1,0 +1,21 @@
+# Local Ikemen GO builds (large binaries)
+/runtime/*
+!/runtime/AGENTS.md
+
+# Go
+*.exe
+*.test
+*.out
+/bin/
+/dist/
+
+# Frontend
+node_modules/
+app/frontend/dist/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
