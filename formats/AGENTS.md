@@ -21,7 +21,9 @@ Go readers/writers for DEF, SFF, AIR, CNS/ST, CMD, ZSS, SND, ACT. Used by [app/]
 | Path | What |
 |---|---|
 | `sff/` | SFF v1 + v2 reader: sprites, palettes, linked sprites, export to `image.Image` |
-| `cmd/kf/` | Debug CLI: `kf inspect <file.sff>`, `kf dump <file.sff> <outdir>` (`-char` for a character's main SFF, `-pal N` to pick a palette) |
+| `air/` | AIR reader: actions, frames, Clsn boxes, Copy Action, timing; `Parse` → `Merge` (common AIR) → `Resolve` |
+| `internal/text/` | MUGEN-style `Atoi`/`Atof`/`SectionName`… from Ikemen. **Every text parser must use these**, never `strconv`, so numbers parse like the engine |
+| `cmd/kf/` | Debug CLI: `kf inspect <file.sff\|file.air>`, `kf dump <file.sff> <outdir>` (`-char` for a character's main SFF, `-pal N` to pick a palette) |
 
 ```sh
 go test ./...                                     # corpus tests skip if ikemen/release is empty

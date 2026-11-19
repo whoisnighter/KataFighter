@@ -1,6 +1,6 @@
 // Command kf is a debugging CLI for katafighter-formats.
 //
-//	kf inspect [-char] <file.sff>          print header, palettes, sprite stats, warnings
+//	kf inspect [-char] <file.sff|file.air>  print a summary and warnings
 //	kf dump [-char] [-pal N] <file.sff> <outdir>   write every sprite as <group>_<number>.png
 package main
 
@@ -11,13 +11,15 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
+	"github.com/whoisnighter/KataFighter/formats/air"
 	"github.com/whoisnighter/KataFighter/formats/sff"
 )
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
-  kf inspect [-char] <file.sff>
+  kf inspect [-char] <file.sff|file.air>
   kf dump [-char] [-pal N] <file.sff> <outdir>
 
   -char   treat the file as a character's main SFF (SFF v1 palette rules)
@@ -57,6 +59,9 @@ func main() {
 }
 
 func inspect(path string, char bool) error {
+	if strings.EqualFold(filepath.Ext(path), ".air") {
+		return inspectAir(path)
+	}
 	f, err := sff.Open(path, sff.Options{Character: char})
 	if err != nil {
 		return err
@@ -104,6 +109,35 @@ func inspect(path string, char bool) error {
 	fmt.Printf("warnings  %d\n", len(f.Warnings))
 	for _, w := range f.Warnings {
 		fmt.Println("  " + w)
+	}
+	return nil
+}
+
+func inspectAir(path string) error {
+	f, err := air.Load(path)
+	if err != nil {
+		return err
+	}
+	frames, copied := 0, 0
+	for _, a := range f.Actions {
+		frames += len(a.Frames)
+		if a.CopiedFrom >= 0 {
+			copied++
+		}
+	}
+	fmt.Printf("file      %s\nactions   %d (%d copied)\nframes    %d\n", path, len(f.Actions), copied, frames)
+	fmt.Println("actions (number: frames, loopstart, total time):")
+	for i, no := range f.Numbers() {
+		if i >= 15 {
+			fmt.Printf("  ... %d more\n", len(f.Actions)-i)
+			break
+		}
+		a := f.Actions[no]
+		fmt.Printf("  %5d: %2d frames, loop %d, time %d\n", no, len(a.Frames), a.LoopStart, a.TotalTime)
+	}
+	fmt.Printf("diagnostics %d\n", len(f.Diagnostics))
+	for _, d := range f.Diagnostics {
+		fmt.Println("  " + d.String())
 	}
 	return nil
 }
