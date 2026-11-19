@@ -257,6 +257,6 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 1. ~~Create the GitHub repository `KataFighter` (MIT) and push this plan.~~ Done.
 2. ~~Add Ikemen GO v1.0.0 as `ikemen/source` and audit SFF (Section 5).~~ Done, see `docs/upstream-audit.md`.
-3. SFF spike: extract the SFF v2 reader into `formats/sff`, with a CLI that dumps Kung Fu Man's sprites to PNG.
+3. ~~SFF spike: extract the SFF reader into `formats/sff`, with a CLI that dumps Kung Fu Man's sprites to PNG.~~ Done: v1 + v2, `kf inspect` / `kf dump`.
 4. Build the first golden test: compare decoded sprites with Ikemen output.
 5. Set up `go.work` with `formats`, `lsp`, `app`; scaffold Wails v3 + Svelte app.

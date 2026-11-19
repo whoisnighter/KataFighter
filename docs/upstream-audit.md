@@ -29,5 +29,25 @@ Source: `ikemen/source` (submodule), tag **v1.0.0**, commit `81c6da71d689625e20d
 ## Corpus available in the v1.0.0 release (`ikemen/release/`)
 `chars/kfm`, `kfm720`, `kfm_zss`, `kfm_zaxis`: main `.sff` are **v2.0.1**, `intro.sff`/`ending.sff` are **v1.0.1**. ZSS samples in `kfm_zss`, `data/*.zss`.
 
-## Verdict
-SFF extraction looks feasible (~1–2 days): decoders are self-contained; only the texture/loader layer needs replacing.
+## Status: SFF extracted (spike done, 2026-11-19)
+
+Ported to `formats/sff`:
+- `decode.go`: the four decoders, logic unchanged.
+- `sff.go`: header, sprite and palette loading for v1 and v2, plus linked sprites.
+- `image.go`: export to `image.Image`.
+
+Deliberate differences from upstream are listed in the header of `sff.go`:
+- Pixels are kept in memory.
+- A bad sprite becomes a warning instead of aborting the load.
+- No panic on a short read.
+- Decoder panics are recovered.
+- `isActPal` is not ported.
+
+Verified:
+- All 49 `.sff` files in the v1.0.0 release load with 0 warnings: chars, stages, fonts and `data/`, both v1 and v2.
+- KFM sprites, palette swaps, the PNG8 portrait and the v1 PCX intro export to PNG and look correct.
+- 30 s of fuzzing `Load` with no crash.
+
+Not yet verified: pixel-exact comparison against Ikemen's own rendering (golden tests, [PLAN §8](PLAN.md#8-testing-strategy)).
+
+Next to audit: AIR (`anim.go`), then DEF / CNS / ZSS (`char.go`, `compiler.go`).
