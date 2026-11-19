@@ -1,5 +1,7 @@
 # Upstream audit — Ikemen GO
 
+↑ [docs](AGENTS.md) · Pinned version: [ikemen/](../ikemen/AGENTS.md) · Extraction rules: [formats/](../formats/AGENTS.md)
+
 Source: `ikemen/source` (submodule), tag **v1.0.0**, commit `81c6da71d689625e20db79586815b695da00dd6d`. License: MIT (`LICENCE.txt`). Go 1.20, everything in `package main`.
 
 ## SFF (`src/image.go`, ~2300 lines)

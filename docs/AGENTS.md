@@ -1,6 +1,13 @@
 # docs/
 
-Design notes and format references.
+↑ [Root](../AGENTS.md)
 
-- `PLAN.md`: vision, architecture, roadmap, open questions.
-- `upstream-audit.md` — what in Ikemen GO can be reused, where (file:line at the pinned commit), and what must be rewritten. Keep it current when extracting code.
+| File | Owns |
+|---|---|
+| [PLAN.md](PLAN.md) | Vision, architecture, roadmap, risks, open questions |
+| [upstream-audit.md](upstream-audit.md) | What can be reused from Ikemen GO (file:line at the pinned version) and what must be rewritten |
+
+## Rules
+
+- When a phase task is finished, tick it in PLAN.md.
+- Keep upstream-audit.md current whenever code is extracted. The extraction rules themselves are in [formats/](../formats/AGENTS.md).

@@ -1,6 +1,20 @@
-# ikemen/ — Ikemen GO reference material
+# ikemen/: Ikemen GO reference material
 
-Read-only reference. Nothing in this folder is built or imported by KataFighter.
+↑ [Root](../AGENTS.md) · Used by: [formats/](../formats/AGENTS.md) · Audit: [upstream-audit.md](../docs/upstream-audit.md)
 
-- `source/`: Ikemen GO source as a git submodule, pinned to tag **v1.0.0** (commit `81c6da7`). Copy code from here into `formats/`, and record what you took in `docs/upstream-audit.md`. Don't edit it. To bump the version, check out a new tag in the submodule, then re-audit.
-- `release/`: official release builds from https://github.com/ikemen-engine/Ikemen-GO/releases, unzipped here (git-ignored). Used for the KFM test corpus (`chars/kfm*`), for reference output in golden tests, and for the "Test" button.
+Read-only reference. Nothing here is built or imported.
+
+## Pinned version (owned here)
+
+**Ikemen GO v1.0.0**, commit `81c6da71d689625e20db79586815b695da00dd6d`. To bump it, check out a new tag in `source/`, update this section, then re-audit.
+
+## source/
+
+Ikemen GO source as a git submodule. Don't edit it.
+
+## release/ (git-ignored)
+
+Official builds from https://github.com/ikemen-engine/Ikemen-GO/releases, unzipped here, e.g. `release/Ikemen_GO-v1.0.0-windows/`. Used for:
+- the KFM test corpus (`chars/kfm*`: main `.sff` files are v2, `intro`/`ending` are v1)
+- reference output for golden tests
+- the "Test" button ([Phase 5](../docs/PLAN.md#phase-5--test-integration-23-weeks))

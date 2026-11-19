@@ -1,8 +1,11 @@
-# app/ — KataFighter desktop app
+# app/: KataFighter desktop app
 
-Wails v3 application: Go services in `services/`, Svelte 5 + TypeScript frontend in `frontend/`. Not scaffolded yet (Phase 0 / Phase 3+ in `docs/PLAN.md`).
+↑ [Root](../AGENTS.md) · Roadmap: [Phases 3–5](../docs/PLAN.md#7-roadmap) · Architecture: [PLAN §4](../docs/PLAN.md#4-architecture)
 
-Rules:
+Wails v3 application: Go services in `services/`, Svelte 5 + TypeScript frontend in `frontend/`. Not scaffolded yet.
+
+## Rules
+
 - Pin the exact Wails v3 version in `go.mod`.
-- The UI talks to the core only through typed Wails bindings in `services/`; no format parsing in the frontend.
-- Import format logic from `formats/`, never from `ikemen/`.
+- The UI talks to the core only through typed Wails bindings in `services/`. The frontend does no format parsing.
+- Format logic comes from [formats/](../formats/AGENTS.md). Code editing features come from [lsp/](../lsp/AGENTS.md).

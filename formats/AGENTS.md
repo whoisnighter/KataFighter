@@ -1,10 +1,21 @@
-# formats/ — katafighter-formats
+# formats/: katafighter-formats
 
-Go readers/writers for DEF, SFF, AIR, CNS/ST, CMD, ZSS, SND, ACT, extracted from Ikemen GO (`ikemen/source`, tag v1.0.0). Phase 1 in `docs/PLAN.md`.
+↑ [Root](../AGENTS.md) · Roadmap: [Phase 1](../docs/PLAN.md#phase-1--katafighter-formats-read-only-35-weeks)
 
-Rules:
-- No UI or GPU dependencies. Decoded sprites are kept in memory as `[]byte` / RGBA.
-- Extracted files keep the Ikemen GO MIT copyright header and note the upstream file + commit they came from.
-- Tolerant parsing: never panic on malformed input; return errors / diagnostics.
-- Read `docs/upstream-audit.md` before extracting; update it when you extract something new.
-- `testdata/`: golden files and license-safe samples only. The KFM corpus comes from `ikemen/release/` (not committed).
+Go readers/writers for DEF, SFF, AIR, CNS/ST, CMD, ZSS, SND, ACT. Used by [app/](../app/AGENTS.md) and [lsp/](../lsp/AGENTS.md).
+
+## Extraction rules (owned here)
+
+- Copy code from `ikemen/source` at the pinned version (see [ikemen/](../ikemen/AGENTS.md)). Never import it.
+- Every extracted file keeps the Ikemen GO MIT copyright header and notes the upstream file and commit it came from.
+- Before extracting, read [upstream-audit.md](../docs/upstream-audit.md). After extracting, update it.
+
+## Parsing rules (owned here)
+
+- No UI or GPU dependencies. Decoded sprites stay in memory as `[]byte` / RGBA.
+- Tolerant parsing: never panic on malformed community files. Return errors or diagnostics with file:line:col.
+- Writers must round-trip losslessly. See [Testing Strategy](../docs/PLAN.md#8-testing-strategy).
+
+## testdata/
+
+Golden files and license-safe samples only. The KFM corpus is read from `ikemen/release/` and is not committed.
