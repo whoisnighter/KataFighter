@@ -2,7 +2,7 @@
 
 > An open-source character editor for **Ikemen GO** (and M.U.G.E.N-compatible content), built with **Go + Wails v3**.
 
-Status: Draft v0.1 · Last updated: 2026-11-19
+Status: Draft v0.2 · Last updated: 2026-11-19
 
 ---
 
@@ -88,8 +88,8 @@ KataFighter aims to be a modern, cross-platform, open-source studio for creating
 ```
 KataFighter/
 ├─ go.work
-├─ PLAN.md
 ├─ README.md
+├─ AGENTS.md                    # rules for contributors & AI agents
 ├─ LICENSE                      # MIT
 ├─ THIRD_PARTY_NOTICES.md       # Ikemen GO MIT notice, other deps
 ├─ CONTRIBUTING.md
@@ -104,7 +104,10 @@ KataFighter/
 │  ├─ services/                 # project, sprite, anim, code, sound, test
 │  └─ frontend/                 # Svelte + TS
 ├─ vscode-extension/            # thin client for katafighter-lsp
-└─ docs/
+├─ docs/                        # this plan, upstream audit, design notes
+└─ ikemen/                      # Ikemen GO reference material (not built)
+   ├─ source/                   # git submodule, pinned tag (v1.0.0)
+   └─ release/                  # official builds, git-ignored
 ```
 
 ---
@@ -252,7 +255,8 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 ## 12. Immediate Next Steps
 
-1. Create the GitHub repository `KataFighter` (MIT) and push this plan.
-2. Set up `go.work` with `formats`, `lsp`, `app`; scaffold Wails v3 + Svelte app.
-3. Clone Ikemen GO and start the code audit (Section 5), beginning with SFF v2.
-4. Build the first golden test: decode Kung Fu Man's SFF and compare with Ikemen output.
+1. ~~Create the GitHub repository `KataFighter` (MIT) and push this plan.~~ Done.
+2. ~~Add Ikemen GO v1.0.0 as `ikemen/source` and audit SFF (Section 5).~~ Done, see `docs/upstream-audit.md`.
+3. SFF spike: extract the SFF v2 reader into `formats/sff`, with a CLI that dumps Kung Fu Man's sprites to PNG.
+4. Build the first golden test: compare decoded sprites with Ikemen output.
+5. Set up `go.work` with `formats`, `lsp`, `app`; scaffold Wails v3 + Svelte app.

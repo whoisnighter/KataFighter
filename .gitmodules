@@ -1,4 +1,4 @@
-[submodule "upstream/Ikemen-GO"]
-	path = upstream/Ikemen-GO
+[submodule "ikemen/source"]
+	path = ikemen/source
 	url = https://github.com/ikemen-engine/Ikemen-GO.git
 	shallow = true

@@ -1,6 +1,6 @@
 # Upstream audit — Ikemen GO
 
-Source: `upstream/Ikemen-GO` (submodule), tag **v1.0.0**, commit `81c6da71d689625e20db79586815b695da00dd6d`. License: MIT (`LICENCE.txt`). Go 1.20, everything in `package main`.
+Source: `ikemen/source` (submodule), tag **v1.0.0**, commit `81c6da71d689625e20db79586815b695da00dd6d`. License: MIT (`LICENCE.txt`). Go 1.20, everything in `package main`.
 
 ## SFF (`src/image.go`, ~2300 lines)
 
@@ -24,7 +24,7 @@ Source: `upstream/Ikemen-GO` (submodule), tag **v1.0.0**, commit `81c6da71d68962
 ### SFF v1 caveats
 `Sprite.read` uses heuristics (scan backwards for `0x0C` palette marker; special case for the character's first / 0,0 sprite). Copy as-is and cover with golden tests.
 
-## Corpus available in the v1.0.0 release (`runtime/`)
+## Corpus available in the v1.0.0 release (`ikemen/release/`)
 `chars/kfm`, `kfm720`, `kfm_zss`, `kfm_zaxis`: main `.sff` are **v2.0.1**, `intro.sff`/`ending.sff` are **v1.0.1**. ZSS samples in `kfm_zss`, `data/*.zss`.
 
 ## Verdict

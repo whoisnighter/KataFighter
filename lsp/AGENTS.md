@@ -1,6 +1,6 @@
 # lsp/ — katafighter-lsp
 
-Language server for CNS/ST/CMD/ZSS (diagnostics, completion, hover, go-to-definition). Phase 2 in `PLAN.md`.
+Language server for CNS/ST/CMD/ZSS (diagnostics, completion, hover, go-to-definition). Phase 2 in `docs/PLAN.md`.
 
 Rules:
 - Parse via `formats/`; do not duplicate parsers here.

@@ -1,6 +1,5 @@
-# Local Ikemen GO builds (large binaries)
-/runtime/*
-!/runtime/AGENTS.md
+# Ikemen GO release builds (large binaries)
+/ikemen/release/*
 
 # Go
 *.exe
