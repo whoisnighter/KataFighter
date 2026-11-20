@@ -6,6 +6,7 @@
 |---|---|
 | [PLAN.md](PLAN.md) | Vision, architecture, roadmap, risks, open questions |
 | [upstream-audit.md](upstream-audit.md) | What can be reused from Ikemen GO (file:line at the pinned version) and what must be rewritten |
+| [assets/](assets/) | Logo: `logo.svg` (source) and `logo.png` (1024×1024 export) |
 
 ## Rules
 
