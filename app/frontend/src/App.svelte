@@ -203,7 +203,7 @@
       <img src={logo} alt="" />
       <h2>KataFighter</h2>
       <p class="muted">Character editor for Ikemen GO · version 0.1.0</p>
-      <p class="muted">MIT License. Reads files the way Ikemen GO v1.0.0 does.</p>
+      <p class="muted">MIT License</p>
       <button class="btn primary" onclick={() => (about = false)}>OK</button>
     </div>
   </div>
