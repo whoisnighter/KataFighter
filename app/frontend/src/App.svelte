@@ -11,6 +11,7 @@
   import StatusBar from "./lib/StatusBar.svelte";
   import QuickOpen from "./lib/QuickOpen.svelte";
   import Icon from "./lib/Icon.svelte";
+  import FileIcon from "./lib/FileIcon.svelte";
   import logo from "../../../docs/assets/logo.svg";
 
   const REPO = "https://github.com/whoisnighter/KataFighter";
@@ -150,7 +151,7 @@
       <div class="tabs">
         <div class="tab active">
           {#if character}
-            <Icon name="def" size={14} /><span>{character.displayName || character.name}</span>
+            <FileIcon name="def" size={14} /><span>{character.displayName || character.name}</span>
           {:else}
             <img src={logo} alt="" /><span>Welcome</span>
           {/if}
@@ -224,7 +225,6 @@
   }
   .tab.active { background: var(--editor); color: var(--text); box-shadow: inset 0 1px 0 var(--accent); margin-bottom: -1px; }
   .tab img { width: 14px; height: 14px; }
-  .tab :global(.icon) { color: var(--accent); }
 
   .banner {
     flex: none;

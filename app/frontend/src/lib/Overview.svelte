@@ -1,4 +1,5 @@
 <script lang="ts">
+  import FileIcon, { fileIconFor } from "./FileIcon.svelte";
   import type { Character } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
 
   let { character }: { character: Character } = $props();
@@ -26,7 +27,7 @@
       {#each character.files ?? [] as f}
         <tr class:missing={!f.path} title={f.path || "not found"}>
           <td class="mono muted">{f.role}</td>
-          <td>{f.name}</td>
+          <td><span class="fname"><FileIcon name={fileIconFor(f.role, f.name)} size={14} />{f.name}</span></td>
           <td class="muted">{f.summary}</td>
         </tr>
       {/each}
@@ -51,4 +52,5 @@
   .files tbody tr:hover { background: var(--hover); }
   .files td:first-child { width: 90px; }
   .missing td { color: var(--error); }
+  .fname { display: inline-flex; align-items: center; gap: 6px; }
 </style>
