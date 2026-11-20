@@ -10,11 +10,13 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
+	"github.com/whoisnighter/KataFighter/formats/act"
 	"github.com/whoisnighter/KataFighter/formats/air"
 	"github.com/whoisnighter/KataFighter/formats/cns"
 	"github.com/whoisnighter/KataFighter/formats/def"
 	"github.com/whoisnighter/KataFighter/formats/diag"
 	"github.com/whoisnighter/KataFighter/formats/sff"
+	"github.com/whoisnighter/KataFighter/formats/snd"
 	"github.com/whoisnighter/KataFighter/formats/zss"
 )
 
@@ -118,9 +120,9 @@ func (s *ProjectService) Open(defPath string) (*Character, error) {
 	add("stcommon", f.StCommon, d.FindState, c.loadText)
 	add("sprite", f.Sprite, d.Find, c.loadSprite)
 	add("anim", f.Anim, d.Find, c.loadAnim)
-	add("sound", f.Sound, d.Find, nil)
+	add("sound", f.Sound, d.Find, c.loadSound)
 	for i := 1; i <= def.PaletteMax; i++ {
-		add(fmt.Sprintf("pal%d", i), f.Pal[i], d.Find, nil)
+		add(fmt.Sprintf("pal%d", i), f.Pal[i], d.Find, loadPalette)
 	}
 	return c, nil
 }
@@ -141,6 +143,26 @@ func (c *Character) loadSprite(p string) string {
 	}
 	c.addProblems(f.Diagnostics)
 	return fmt.Sprintf("SFF %v, %d sprites, %d palettes", f.Header.Version, len(f.Sprites), len(f.Palettes))
+}
+
+func (c *Character) loadSound(p string) string {
+	f, err := snd.Open(p)
+	if err != nil {
+		return "error: " + err.Error()
+	}
+	c.addProblems(f.Diagnostics)
+	return fmt.Sprintf("SND, %d sounds", len(f.Sounds))
+}
+
+func loadPalette(p string) string {
+	a, err := act.Load(p)
+	if err != nil {
+		return "error: " + err.Error()
+	}
+	if a.Short() {
+		return fmt.Sprintf("ACT, only %d of 256 colors", a.Read)
+	}
+	return "ACT, 256 colors"
 }
 
 func (c *Character) loadAnim(p string) string {

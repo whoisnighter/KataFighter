@@ -9,6 +9,7 @@
   import Overview from "./lib/Overview.svelte";
   import SpriteBrowser from "./lib/SpriteBrowser.svelte";
   import AnimPlayer from "./lib/AnimPlayer.svelte";
+  import type { ActFile, PaletteChoice } from "./lib/sprites";
   import Problems from "./lib/Problems.svelte";
   import StatusBar from "./lib/StatusBar.svelte";
   import QuickOpen from "./lib/QuickOpen.svelte";
@@ -33,13 +34,20 @@
   type TabId = "overview" | "sprites" | "anim";
   let tabs = $state<TabId[]>(["overview"]);
   let active = $state<TabId>("overview");
-  let palette = $state(-1); // shared by the sprite browser and the animation player
+  let palette = $state<PaletteChoice>(""); // shared by the sprite browser and the animation player
 
   const desktop = $derived(mode === "desktop");
   const problems = $derived(character?.problems ?? []);
   const errors = $derived(problems.filter((p) => p.severity === "error").length);
   const warnings = $derived(problems.filter((p) => p.severity === "warning").length);
   const spritePath = $derived(character?.files?.find((f) => f.role === "sprite")?.path ?? "");
+  // The DEF's pal1..palN files that were found (ACT palettes).
+  const acts = $derived<ActFile[]>(
+    (character?.files ?? []).flatMap((f) => {
+      const m = f.role.match(/^pal(\d+)$/);
+      return m && f.path ? [{ slot: Number(m[1]), name: f.name, path: f.path }] : [];
+    }),
+  );
   const animPath = $derived(character?.files?.find((f) => f.role === "anim")?.path ?? "");
   const title = $derived(character ? `${baseName(character.defPath)} — KataFighter` : "KataFighter");
 
@@ -90,7 +98,7 @@
         character = c;
         tabs = ["overview"];
         active = "overview";
-        palette = -1;
+        palette = "";
         saveRecent([c.defPath, ...recent.filter((p) => p !== c.defPath)]);
       }
     } catch (e) {
@@ -217,9 +225,9 @@
 
       <div class="content" class:fill={character && active !== "overview"}>
         {#if character && active === "sprites"}
-          <SpriteBrowser path={spritePath} bind:palette />
+          <SpriteBrowser path={spritePath} {acts} bind:palette />
         {:else if character && active === "anim"}
-          <AnimPlayer {animPath} {spritePath} bind:palette />
+          <AnimPlayer {animPath} {spritePath} {acts} bind:palette />
         {:else if character}
           <Overview {character} onopen={openTab} />
         {:else}

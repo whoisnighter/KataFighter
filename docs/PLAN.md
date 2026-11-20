@@ -158,7 +158,7 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 ### Phase 1 — `katafighter-formats` read-only (3–5 weeks)
 - [x] Audit & extract Ikemen GO parsers (Section 5)
-- [ ] DEF, SFF v2 (all compression modes), ACT, AIR, SND readers (DEF, SFF v1+v2, AIR done; ACT, SND left)
+- [x] DEF, SFF v2 (all compression modes), ACT, AIR, SND readers (also SFF v1; SND checks WAV headers but not a full decode like Ikemen)
 - [x] CNS/ST/CMD/ZSS parsing into an AST with source positions
 - [x] Diagnostics model (errors/warnings with file:line:col)
 - [x] CLI `kf inspect <char.def>` for debugging
@@ -173,7 +173,7 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 ### Phase 3 — Editor MVP: viewer (3–4 weeks)
 - [x] Open project from `.def`; project tree
-- [x] Sprite browser (group/index grid, zoom, axis display, palette switch; SFF palettes only until the ACT reader lands)
+- [x] Sprite browser (group/index grid, zoom, axis display, palette switch with the DEF's ACT files and the SFF's palettes)
 - [x] Animation player (play/pause/step, loop, Clsn overlay, onion skin; blend modes approximated on canvas)
 - [ ] Monaco editor wired to the LSP for CNS/ST/CMD/ZSS
 - [ ] Cross-navigation: click `anim = 200` → opens action 200

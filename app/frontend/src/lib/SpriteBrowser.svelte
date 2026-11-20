@@ -2,10 +2,10 @@
   import { tick } from "svelte";
   import { ViewerService } from "../../bindings/github.com/whoisnighter/KataFighter/app/services";
   import type { SpriteInfo, SpriteSheet } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
-  import { spriteURL, visible } from "./sprites";
+  import { paletteOptions, spriteURL, visible, type ActFile, type PaletteChoice } from "./sprites";
   import PaletteSelect from "./PaletteSelect.svelte";
 
-  let { path, palette = $bindable(-1) }: { path: string; palette?: number } = $props();
+  let { path, acts = [], palette = $bindable("") }: { path: string; acts?: ActFile[]; palette?: PaletteChoice } = $props();
 
   let sheet = $state<SpriteSheet | null>(null);
   let error = $state("");
@@ -58,7 +58,10 @@
     return out;
   });
 
-  const tkey = (s: SpriteInfo, pal: number) => `${s.group},${s.number},${pal}`;
+  const options = $derived(paletteOptions(sheet?.palettes ?? [], acts));
+  const paletteLabel = $derived(options.find((o) => o.value === palette)?.label ?? "");
+
+  const tkey = (s: SpriteInfo, pal: PaletteChoice) => `${s.group},${s.number},${pal}`;
 
   function loadThumb(s: SpriteInfo) {
     const k = tkey(s, palette);
@@ -92,7 +95,7 @@
   }
 
   function spriteName(index: number): string {
-    const s = sheet?.sprites[index];
+    const s = sheet?.sprites?.[index];
     return s ? `${s.group},${s.number}` : `#${index}`;
   }
 
@@ -109,8 +112,8 @@
   <div class="toolbar">
     <input class="field filter" placeholder="Filter: 200, 200,5 or 200-210" bind:value={filter} spellcheck="false" />
     {#if sheet}
-      <PaletteSelect palettes={sheet.palettes} bind:value={palette} />
-      <span class="muted count">{shown.length} / {sheet.sprites.length} sprites · SFF {sheet.version}</span>
+      <PaletteSelect {options} bind:value={palette} />
+      <span class="muted count">{shown.length} / {sheet.sprites?.length ?? 0} sprites · SFF {sheet.version}</span>
     {/if}
   </div>
 
@@ -178,8 +181,8 @@
             <dt>Axis</dt><dd>{selected.axisX}, {selected.axisY}</dd>
             <dt>Format</dt><dd>{selected.format}, {selected.depth}-bit</dd>
             {#if selected.palette >= 0}
-              {@const p = sheet.palettes[selected.palette]}
-              <dt>Palette</dt><dd>{p ? `${p.group},${p.number}` : selected.palette}{selected.palette === 0 && palette >= 0 ? ` → shown with ${sheet.palettes[palette].group},${sheet.palettes[palette].number}` : ""}</dd>
+              {@const p = sheet.palettes?.[selected.palette]}
+              <dt>Palette</dt><dd>{p ? `${p.group},${p.number}` : selected.palette}{selected.palette === 0 && palette ? ` → shown with ${paletteLabel}` : ""}</dd>
             {/if}
             {#if selected.linkedTo >= 0}<dt>Linked to</dt><dd>{spriteName(selected.linkedTo)}</dd>{/if}
             <dt>Index</dt><dd>{selected.index}</dd>

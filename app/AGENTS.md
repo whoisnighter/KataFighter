@@ -7,6 +7,7 @@ Wails v3 application: Go services in `services/`, Svelte 5 + TypeScript frontend
 ## Rules
 
 - Wails is pinned to **v3.1.0** in `go.mod`, and `@wailsio/runtime` to the same version in `frontend/package.json`. Bump both together, along with the `wails3` CLI.
+- `go.mod` replaces `formats` with `../formats`. The Wails build runs `go mod tidy`, which ignores `go.work`; without the replace, the app would build against the last `formats` pushed to GitHub.
 - The UI talks to the core only through typed Wails bindings in `services/`. The frontend does no format parsing.
 - Format logic comes from [formats/](../formats/AGENTS.md). Code editing features come from [lsp/](../lsp/AGENTS.md).
 - `frontend/bindings/` is generated on every build (`wails3 generate bindings`) and is not committed.
@@ -19,7 +20,7 @@ Wails v3 application: Go services in `services/`, Svelte 5 + TypeScript frontend
 | Path | What |
 |---|---|
 | `main.go` | App and the frameless main window (the title bar is drawn by the frontend) |
-| `services/` | `ProjectService`: `Mode`, `ChooseDef` (native dialog), `Open` (loads a character through `formats`: files + problems). `ViewerService`: `Sprites`, `SpriteImage` (PNG data URL, optional palette), `Actions` (AIR, ready to draw); files are cached by path and mtime |
+| `services/` | `ProjectService`: `Mode`, `ChooseDef` (native dialog), `Open` (loads a character through `formats`: files + problems). `ViewerService`: `Sprites`, `SpriteImage` (PNG data URL, optionally recolored with an SFF palette or an ACT file), `Actions` (AIR, ready to draw); files are cached by path and mtime |
 | `frontend/src/App.svelte` | Shell: title bar, Explorer, tab area, Problems panel, status bar, shortcuts |
 | `frontend/src/lib/` | Shell parts: `TitleBar` (menus, window buttons), `Explorer`, `Welcome` (recent list), `Overview`, `Problems`, `StatusBar`, `QuickOpen` (path input). Viewers: `SpriteBrowser`, `AnimPlayer`, `PaletteSelect`; `sprites.ts` caches sprite images |
 | `build/` | Wails build assets (icons, Windows/macOS/Linux packaging). Metadata lives in `build/config.yml`; run `wails3 task common:update:build-assets` after editing it |

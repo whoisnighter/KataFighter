@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/whoisnighter/KataFighter/formats/act"
 	"github.com/whoisnighter/KataFighter/formats/air"
 	"github.com/whoisnighter/KataFighter/formats/sff"
 )
@@ -20,6 +21,7 @@ type ViewerService struct {
 	mu   sync.Mutex
 	sffs map[string]cached[*sff.File]
 	airs map[string]cached[*air.File]
+	acts map[string]cached[*act.Palette]
 }
 
 type cached[T any] struct {
@@ -86,14 +88,24 @@ func (v *ViewerService) Sprites(path string) (*SpriteSheet, error) {
 	return sh, nil
 }
 
-// SpriteImage returns sprite group,number as a PNG data URL. pal is a
-// palette index to use instead of the character's main palette, or -1.
-// Like a palette change in Ikemen, it only recolors sprites that use the
-// main palette (the first one); sprites with their own palette keep it.
-func (v *ViewerService) SpriteImage(path string, group, number, pal int) (string, error) {
+// SpriteImage returns sprite group,number as a PNG data URL. To show the
+// sprite with another palette, pass actPath (an ACT file, like the DEF's
+// pal1..palN) or pal (an index into the SFF's palettes); otherwise "" and
+// -1. Like a palette change in Ikemen, this only recolors sprites drawn
+// with the main palette (the first one); sprites with their own palette
+// keep it.
+func (v *ViewerService) SpriteImage(path string, group, number, pal int, actPath string) (string, error) {
 	f, err := v.sff(path)
 	if err != nil {
 		return "", err
+	}
+	var actColors []uint32
+	if actPath != "" {
+		a, err := v.act(actPath)
+		if err != nil {
+			return "", err
+		}
+		actColors = a.Colors
 	}
 	if group < 0 || group > 0xFFFF || number < 0 || number > 0xFFFF {
 		return "", fmt.Errorf("sprite %d,%d out of range", group, number)
@@ -103,8 +115,12 @@ func (v *ViewerService) SpriteImage(path string, group, number, pal int) (string
 		return "", fmt.Errorf("sprite %d,%d not found", group, number)
 	}
 	var colors []uint32
-	if len(s.Pix) > 0 && pal >= 0 && pal < len(f.Palettes) && paletteIndex(f, s) == 0 {
-		colors = f.Palettes[pal].Colors
+	if len(s.Pix) > 0 && paletteIndex(f, s) == 0 {
+		if actColors != nil {
+			colors = actColors
+		} else if pal >= 0 && pal < len(f.Palettes) {
+			colors = f.Palettes[pal].Colors
+		}
 	}
 	img, err := f.Image(s, colors)
 	if err != nil {
@@ -206,6 +222,15 @@ func (v *ViewerService) sff(path string) (*sff.File, error) {
 	return load(v.sffs, path, func(p string) (*sff.File, error) {
 		return sff.Open(p, sff.Options{Character: true})
 	})
+}
+
+func (v *ViewerService) act(path string) (*act.Palette, error) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	if v.acts == nil {
+		v.acts = map[string]cached[*act.Palette]{}
+	}
+	return load(v.acts, path, act.Load)
 }
 
 func (v *ViewerService) air(path string) (*air.File, error) {

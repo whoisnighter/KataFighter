@@ -19,16 +19,33 @@ func TestViewerKFM(t *testing.T) {
 	if len(sh.Sprites) != 281 || len(sh.Palettes) == 0 {
 		t.Fatalf("%d sprites, %d palettes", len(sh.Sprites), len(sh.Palettes))
 	}
-	a, err := v.SpriteImage(dir+"kfm.sff", 0, 0, -1)
+	a, err := v.SpriteImage(dir+"kfm.sff", 0, 0, -1, "")
 	if err != nil || !strings.HasPrefix(a, "data:image/png;base64,") {
 		t.Fatalf("sprite 0,0: %v", err)
 	}
-	b, err := v.SpriteImage(dir+"kfm.sff", 0, 0, 1)
+	b, err := v.SpriteImage(dir+"kfm.sff", 0, 0, 1, "")
 	if err != nil || a == b {
 		t.Errorf("palette 1 should recolor sprite 0,0 (err %v)", err)
 	}
-	if _, err := v.SpriteImage(dir+"kfm.sff", 9999, 0, -1); err == nil {
+	if _, err := v.SpriteImage(dir+"kfm.sff", 9999, 0, -1, ""); err == nil {
 		t.Error("missing sprite: no error")
+	}
+
+	// An ACT palette recolors sprites drawn with the main palette.
+	actPath := t.TempDir() + "/red.act"
+	red := make([]byte, 768)
+	for i := 0; i < 256; i++ {
+		red[i*3] = 255
+	}
+	if err := os.WriteFile(actPath, red, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	c, err := v.SpriteImage(dir+"kfm.sff", 0, 0, -1, actPath)
+	if err != nil || c == a || c == b {
+		t.Errorf("ACT palette should recolor sprite 0,0 (err %v)", err)
+	}
+	if _, err := v.SpriteImage(dir+"kfm.sff", 0, 0, -1, actPath+".missing"); err == nil {
+		t.Error("missing ACT: no error")
 	}
 
 	acts, err := v.Actions(dir + "kfm.air")

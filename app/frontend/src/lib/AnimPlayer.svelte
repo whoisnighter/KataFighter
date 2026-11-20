@@ -2,11 +2,11 @@
   import { onDestroy, tick } from "svelte";
   import { ViewerService } from "../../bindings/github.com/whoisnighter/KataFighter/app/services";
   import type { AnimAction, AnimFrame, SpriteInfo, SpriteSheet } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
-  import { cssVar, spriteImage } from "./sprites";
+  import { cssVar, paletteOptions, spriteImage, type ActFile, type PaletteChoice } from "./sprites";
   import Icon from "./Icon.svelte";
   import PaletteSelect from "./PaletteSelect.svelte";
 
-  let { animPath, spritePath, palette = $bindable(-1) }: { animPath: string; spritePath: string; palette?: number } = $props();
+  let { animPath, spritePath, acts = [], palette = $bindable("") }: { animPath: string; spritePath: string; acts?: ActFile[]; palette?: PaletteChoice } = $props();
 
   const TICKS_PER_SECOND = 60; // Ikemen's game speed
   const ZOOMS = [1, 2, 3, 4];
@@ -47,10 +47,10 @@
     loading = true;
     error = "";
     try {
-      const [acts, sh] = await Promise.all([ViewerService.Actions(anim), ViewerService.Sprites(spr).catch(() => null)]);
-      actions = acts;
+      const [list, sh] = await Promise.all([ViewerService.Actions(anim), ViewerService.Sprites(spr).catch(() => null)]);
+      actions = list ?? [];
       sheet = sh;
-      choose(acts.find((a) => a.number === 0) ?? acts[0] ?? null);
+      choose(actions.find((a) => a.number === 0) ?? actions[0] ?? null);
     } catch (e) {
       error = String(e);
     } finally {
@@ -281,7 +281,7 @@
       {#each shown as a (a.number)}
         <button class="act" class:sel={a === action} onclick={() => choose(a)} title={`Line ${a.line}${a.copiedFrom >= 0 ? ` · copy of ${a.copiedFrom}` : ""}`}>
           <span class="num">{a.number}</span>
-          <span class="faint">{a.frames.length}f · {time(a.totalTime)}</span>
+          <span class="faint">{a.frames?.length ?? 0}f ·{time(a.totalTime)}</span>
         </button>
       {:else}
         <p class="muted empty">{loading ? "Loading…" : "No actions."}</p>
@@ -307,7 +307,7 @@
       <select class="field" bind:value={zoom} aria-label="Zoom">
         {#each ZOOMS as z}<option value={z}>{z * 100}%</option>{/each}
       </select>
-      {#if sheet}<PaletteSelect palettes={sheet.palettes} bind:value={palette} />{/if}
+      {#if sheet}<PaletteSelect options={paletteOptions(sheet.palettes ?? [], acts)} bind:value={palette} />{/if}
       <button class="tool" title="Center view" onclick={() => (pan = { x: 0, y: 0 })}>⌖</button>
     </div>
 
