@@ -1,6 +1,6 @@
 // Command kf is a debugging CLI for katafighter-formats.
 //
-//	kf inspect [-char] <file.sff|file.air>  print a summary and warnings
+//	kf inspect [-char] <file.def|file.sff|file.air>  print a summary and diagnostics
 //	kf dump [-char] [-pal N] <file.sff> <outdir>   write every sprite as <group>_<number>.png
 package main
 
@@ -14,15 +14,17 @@ import (
 	"strings"
 
 	"github.com/whoisnighter/KataFighter/formats/air"
+	"github.com/whoisnighter/KataFighter/formats/def"
 	"github.com/whoisnighter/KataFighter/formats/sff"
 )
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
-  kf inspect [-char] <file.sff|file.air>
+  kf inspect [-char] [-engine DIR] <file.def|file.sff|file.air>
   kf dump [-char] [-pal N] <file.sff> <outdir>
 
   -char   treat the file as a character's main SFF (SFF v1 palette rules)
+  -engine Ikemen folder used to resolve DEF paths (default: nearest parent with data/)
   -pal N  render indexed sprites with palette N (1-based, v2 key 1,N) instead of their own`)
 	os.Exit(2)
 }
@@ -34,6 +36,7 @@ func main() {
 	fs := flag.NewFlagSet(os.Args[1], flag.ExitOnError)
 	char := fs.Bool("char", false, "")
 	pal := fs.Int("pal", 0, "")
+	engine := fs.String("engine", "", "")
 	fs.Usage = usage
 	fs.Parse(os.Args[2:])
 
@@ -43,7 +46,7 @@ func main() {
 		if fs.NArg() != 1 {
 			usage()
 		}
-		err = inspect(fs.Arg(0), *char)
+		err = inspect(fs.Arg(0), *char, *engine)
 	case "dump":
 		if fs.NArg() != 2 {
 			usage()
@@ -58,9 +61,12 @@ func main() {
 	}
 }
 
-func inspect(path string, char bool) error {
-	if strings.EqualFold(filepath.Ext(path), ".air") {
+func inspect(path string, char bool, engine string) error {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".air":
 		return inspectAir(path)
+	case ".def":
+		return inspectDef(path, engine)
 	}
 	f, err := sff.Open(path, sff.Options{Character: char})
 	if err != nil {
@@ -181,4 +187,87 @@ func dump(path, out string, char bool, palNo int) error {
 	}
 	fmt.Printf("wrote %d sprites to %s (%d diagnostics)\n", n, out, len(f.Diagnostics))
 	return nil
+}
+
+func inspectDef(path, engine string) error {
+	d, err := def.Load(path, def.Options{})
+	if err != nil {
+		return err
+	}
+	if engine == "" {
+		engine = def.EngineDir(path)
+	}
+	in := d.Info
+	fmt.Printf("file        %s\nname        %s\ndisplayname %s\nauthor      %s\nlocalcoord  %d,%d\nversions    mugen %q ikemen %q\nengine dir  %s\n",
+		path, in.Name, in.DisplayName, in.Author, in.LocalCoord[0], in.LocalCoord[1], in.MugenVersion, in.IkemenVersion, engine)
+
+	missing := 0
+	show := func(label, name string, find func(string, string) string) {
+		if name == "" {
+			return
+		}
+		found := find(name, engine)
+		if found == "" {
+			found = "NOT FOUND"
+			missing++
+		}
+		fmt.Printf("  %-9s %-18s -> %s\n", label, name, found)
+	}
+	fmt.Println("files:")
+	f := d.Files
+	show("cns", f.CNS, d.Find)
+	show("cmd", f.CMD, d.Find)
+	for i, st := range f.ST {
+		show(fmt.Sprintf("st[%d]", i), st, d.FindState)
+	}
+	show("stcommon", f.StCommon, d.FindState)
+	show("sprite", f.Sprite, d.Find)
+	show("anim", f.Anim, d.Find)
+	show("sound", f.Sound, d.Find)
+	for i := 1; i <= def.PaletteMax; i++ {
+		show(fmt.Sprintf("pal%d", i), f.Pal[i], d.Find)
+	}
+	for _, n := range sortedKeys(f.Movelists) {
+		show(fmt.Sprintf("movelist%d", n), f.Movelists[n], d.Find)
+	}
+	var km []string
+	for i, b := range def.KeymapButtons {
+		if d.Keymap[i] != 0 {
+			km = append(km, fmt.Sprintf("%s=%d", b, d.Keymap[i]))
+		}
+	}
+	fmt.Printf("keymap      %s\n", strings.Join(km, " "))
+
+	// Load the main SFF and AIR to check that the character holds together.
+	if p := d.Find(f.Sprite, engine); p != "" {
+		if s, err := sff.Open(p, sff.Options{Character: true}); err != nil {
+			fmt.Printf("sprite      error: %v\n", err)
+		} else {
+			fmt.Printf("sprite      %d sprites, %d palettes, %d diagnostics\n", len(s.Sprites), len(s.Palettes), len(s.Diagnostics))
+		}
+	}
+	if p := d.Find(f.Anim, engine); p != "" {
+		if a, err := air.Load(p); err != nil {
+			fmt.Printf("anim        error: %v\n", err)
+		} else {
+			fmt.Printf("anim        %d actions, %d diagnostics\n", len(a.Actions), len(a.Diagnostics))
+		}
+	}
+	fmt.Printf("diagnostics %d\n", len(d.Diagnostics))
+	for _, dg := range d.Diagnostics {
+		fmt.Println("  " + dg.String())
+	}
+	if missing > 0 {
+		return fmt.Errorf("%d file(s) not found", missing)
+	}
+	return nil
+}
+
+func sortedKeys[V any](m map[int]V) []int {
+	ks := make([]int, 0, len(m))
+	for k := range m {
+		ks = append(ks, k)
+	}
+	sort.Ints(ks)
+	return ks
 }
