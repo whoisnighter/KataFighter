@@ -9,7 +9,7 @@ Requirements:
 - **Go 1.27** or newer
 - **Node.js 24** with npm (for the app frontend)
 - **Wails CLI v3.1.0**: `go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0`, then `wails3 doctor`
-- On Linux, the WebKitGTK headers: `libgtk-3-dev libwebkit2gtk-4.1-dev`
+- On Linux, the GTK 4 and WebKitGTK 6 headers: `libgtk-4-dev libwebkitgtk-6.0-dev` (what `wails3 doctor` asks for)
 
 ```sh
 git clone --recurse-submodules https://github.com/whoisnighter/KataFighter.git
