@@ -18,3 +18,9 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Personal, tool-specific agent files (shared rules belong in AGENTS.md)
+CLAUDE.local.md
+AGENTS.local.md
+.claude/settings.local.json
+.claude/launch.json

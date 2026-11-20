@@ -36,7 +36,6 @@ ikemen/source ◄──reads── tools/schemagen ──writes──► lsp/sch
 ## Commits
 
 - Imperative mood, short subject line, and a body when the change needs explaining.
-- **Do not add `Co-Authored-By: Claude` or "Generated with Claude Code"** lines to commits or PRs.
 
 ## Setup
 
