@@ -1,6 +1,6 @@
-# Third-party notices
+# Credits
 
-KataFighter is MIT-licensed (see [LICENSE](LICENSE)). It includes material from these projects.
+KataFighter is MIT-licensed (see [LICENSE](LICENSE)). It builds on the projects below; their copyright and license notices are kept here and in the files they came from.
 
 ## Ikemen GO
 

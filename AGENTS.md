@@ -39,8 +39,4 @@ ikemen/source ◄──reads── tools/schemagen ──writes──► lsp/sch
 
 ## Setup
 
-```sh
-git submodule update --init --depth 1
-```
-
-Then see [ikemen/](ikemen/AGENTS.md) for the release build.
+See [CONTRIBUTING.md](CONTRIBUTING.md) (requirements, test corpus, running tests and the app). CI runs the same steps on Windows, macOS and Linux ([.github/workflows/ci.yml](.github/workflows/ci.yml)).

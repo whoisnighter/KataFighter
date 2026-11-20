@@ -91,7 +91,7 @@ KataFighter/
 ├─ README.md
 ├─ AGENTS.md                    # rules for contributors & AI agents
 ├─ LICENSE                      # MIT
-├─ THIRD_PARTY_NOTICES.md       # Ikemen GO MIT notice, other deps
+├─ CREDITS.md                   # third-party credits and license notices (Ikemen GO, icons)
 ├─ CONTRIBUTING.md
 ├─ formats/                     # module: katafighter-formats
 │  ├─ def/  sff/  air/  cns/  cmd/  zss/  snd/  act/
@@ -119,7 +119,7 @@ Ikemen GO's source is MIT-licensed, but much of it lives in a single `package ma
 Plan:
 
 1. **Audit** Ikemen GO `src/` and list the files needed: SFF loading/decoding (RLE8, RLE5, LZ5, PNG), AIR parsing, CNS/ZSS compiler & expression parser, command parsing, SND loading.
-2. **Extract** those parts into `formats/` as clean packages, keeping the original copyright and MIT notice in `THIRD_PARTY_NOTICES.md` and file headers.
+2. **Extract** those parts into `formats/` as clean packages, keeping the original copyright and MIT notice in `CREDITS.md` and file headers.
 3. **Add writers** (encoders/serializers) — the engine only needs readers; the editor also needs to save.
 4. **Track upstream**: record the Ikemen GO commit each package was extracted from; add a script to diff against newer upstream versions.
 5. **Upstream proposal**: open a discussion with the Ikemen GO team about turning the extracted module into a shared library used by both projects.
@@ -149,11 +149,11 @@ Plan:
 Each phase ends with a tagged release. Time estimates assume one part-time developer and are rough.
 
 ### Phase 0 — Foundations (1–2 weeks)
-- [ ] Repo, MIT license, README, CONTRIBUTING, code of conduct
+- [ ] Repo, MIT license, README, CONTRIBUTING, code of conduct (code of conduct left)
 - [ ] Go workspace (`go.work`) with `formats`, `lsp`, `app` modules (`formats`, `app`, `tools` done; `lsp` not created yet)
 - [x] Wails v3 hello-world app with Svelte + TS, pinned versions (v3.1.0; opens a `.def` and lists its files and problems)
-- [ ] CI: build + test on Windows/macOS/Linux
-- [ ] Collect a **test corpus**: Kung Fu Man + a few license-safe community characters (with permission) + intentionally broken files
+- [ ] CI: build + test on Windows/macOS/Linux (`.github/workflows/ci.yml` added; tick once it is green)
+- [ ] Collect a **test corpus**: Kung Fu Man + a few license-safe community characters (with permission) + intentionally broken files (KFM via `tools/fetchcorpus` and broken files done; community characters need permission)
 - **Exit criteria:** CI green on all three OSes; app window opens.
 
 ### Phase 1 — `katafighter-formats` read-only (3–5 weeks)
