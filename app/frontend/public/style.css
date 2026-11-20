@@ -76,3 +76,18 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .mono { font-family: var(--mono); font-size: var(--small); }
 .muted { color: var(--muted); }
+.faint { color: var(--faint); }
+
+/* Small form controls for editor toolbars. */
+.field {
+  height: 24px;
+  padding: 0 8px;
+  font: inherit;
+  color: var(--text);
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+}
+.field:focus { border-color: var(--accent); }
+input[type="checkbox"] { margin: 0; accent-color: var(--accent); }

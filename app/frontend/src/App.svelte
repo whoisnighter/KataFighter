@@ -7,11 +7,13 @@
   import Explorer from "./lib/Explorer.svelte";
   import Welcome from "./lib/Welcome.svelte";
   import Overview from "./lib/Overview.svelte";
+  import SpriteBrowser from "./lib/SpriteBrowser.svelte";
+  import AnimPlayer from "./lib/AnimPlayer.svelte";
   import Problems from "./lib/Problems.svelte";
   import StatusBar from "./lib/StatusBar.svelte";
   import QuickOpen from "./lib/QuickOpen.svelte";
   import Icon from "./lib/Icon.svelte";
-  import FileIcon from "./lib/FileIcon.svelte";
+  import FileIcon, { type FileIconName } from "./lib/FileIcon.svelte";
   import logo from "../../../docs/assets/logo.svg";
 
   const REPO = "https://github.com/whoisnighter/KataFighter";
@@ -27,10 +29,18 @@
   let about = $state(false);
   let recent = $state<string[]>(loadRecent());
 
+  // Editor tabs. The overview is always open; the viewers open on demand.
+  type TabId = "overview" | "sprites" | "anim";
+  let tabs = $state<TabId[]>(["overview"]);
+  let active = $state<TabId>("overview");
+  let palette = $state(-1); // shared by the sprite browser and the animation player
+
   const desktop = $derived(mode === "desktop");
   const problems = $derived(character?.problems ?? []);
   const errors = $derived(problems.filter((p) => p.severity === "error").length);
   const warnings = $derived(problems.filter((p) => p.severity === "warning").length);
+  const spritePath = $derived(character?.files?.find((f) => f.role === "sprite")?.path ?? "");
+  const animPath = $derived(character?.files?.find((f) => f.role === "anim")?.path ?? "");
   const title = $derived(character ? `${baseName(character.defPath)} — KataFighter` : "KataFighter");
 
   $effect(() => {
@@ -78,6 +88,9 @@
       const c = await ProjectService.Open(path);
       if (c) {
         character = c;
+        tabs = ["overview"];
+        active = "overview";
+        palette = -1;
         saveRecent([c.defPath, ...recent.filter((p) => p !== c.defPath)]);
       }
     } catch (e) {
@@ -89,6 +102,27 @@
 
   function closeCharacter() {
     character = null;
+  }
+
+  function canOpen(id: TabId): boolean {
+    if (id === "sprites") return !!spritePath;
+    if (id === "anim") return !!animPath && !!spritePath;
+    return !!character;
+  }
+  function openTab(id: TabId) {
+    if (!canOpen(id)) return;
+    if (!tabs.includes(id)) tabs = [...tabs, id];
+    active = id;
+  }
+  function closeTab(id: TabId) {
+    const i = tabs.indexOf(id);
+    tabs = tabs.filter((t) => t !== id);
+    if (active === id) active = tabs[Math.max(0, i - 1)];
+  }
+  function tabInfo(id: TabId): { label: string; icon: FileIconName } {
+    if (id === "sprites") return { label: `Sprites · ${baseName(spritePath)}`, icon: "sprite" };
+    if (id === "anim") return { label: `Animations · ${baseName(animPath)}`, icon: "anim" };
+    return { label: character?.displayName || character?.name || "", icon: "def" };
   }
 
   const menus: Menu[] = $derived([
@@ -106,6 +140,10 @@
       items: [
         { label: showSidebar ? "Hide Explorer" : "Show Explorer", shortcut: "Ctrl+B", action: () => (showSidebar = !showSidebar), disabled: !character },
         { label: showPanel ? "Hide Problems" : "Show Problems", shortcut: "Ctrl+J", action: () => (showPanel = !showPanel), disabled: !character },
+        { separator: true },
+        { label: "Overview", shortcut: "Ctrl+1", action: () => openTab("overview"), disabled: !character },
+        { label: "Sprites", shortcut: "Ctrl+2", action: () => openTab("sprites"), disabled: !character || !canOpen("sprites") },
+        { label: "Animations", shortcut: "Ctrl+3", action: () => openTab("anim"), disabled: !character || !canOpen("anim") },
       ],
     },
     {
@@ -125,6 +163,9 @@
     else if (k === "w" && character) closeCharacter();
     else if (k === "b" && character) showSidebar = !showSidebar;
     else if (k === "j" && character) showPanel = !showPanel;
+    else if (k === "1" && character) openTab("overview");
+    else if (k === "2" && character) openTab("sprites");
+    else if (k === "3" && character) openTab("anim");
     else return;
     e.preventDefault();
   }
@@ -134,6 +175,9 @@
     // ?def=<path> opens a character directly (used by agents in browser mode).
     const def = new URLSearchParams(location.search).get("def");
     if (def) await openPath(def);
+    // &view=sprites|anim opens a viewer tab.
+    const view = new URLSearchParams(location.search).get("view");
+    if (view === "sprites" || view === "anim") openTab(view);
   });
 </script>
 
@@ -144,18 +188,24 @@
 
   <div class="body" class:with-sidebar={character && showSidebar}>
     {#if character && showSidebar}
-      <aside><Explorer {character} onclose={closeCharacter} /></aside>
+      <aside><Explorer {character} onclose={closeCharacter} onopen={(role) => openTab(role === "sprite" ? "sprites" : role === "anim" ? "anim" : "overview")} /></aside>
     {/if}
 
     <main>
       <div class="tabs">
-        <div class="tab active">
-          {#if character}
-            <FileIcon name="def" size={14} /><span>{character.displayName || character.name}</span>
-          {:else}
-            <img src={logo} alt="" /><span>Welcome</span>
-          {/if}
-        </div>
+        {#if character}
+          {#each tabs as id (id)}
+            {@const t = tabInfo(id)}
+            <div class="tab" class:active={active === id}>
+              <button class="tab-open" onclick={() => (active = id)}><FileIcon name={t.icon} size={14} /><span>{t.label}</span></button>
+              {#if id !== "overview"}
+                <button class="tab-close" aria-label="Close {t.label}" onclick={() => closeTab(id)}><Icon name="close" size={12} /></button>
+              {/if}
+            </div>
+          {/each}
+        {:else}
+          <div class="tab active"><img src={logo} alt="" /><span>Welcome</span></div>
+        {/if}
       </div>
 
       {#if error}
@@ -165,9 +215,13 @@
         </div>
       {/if}
 
-      <div class="content">
-        {#if character}
-          <Overview {character} />
+      <div class="content" class:fill={character && active !== "overview"}>
+        {#if character && active === "sprites"}
+          <SpriteBrowser path={spritePath} bind:palette />
+        {:else if character && active === "anim"}
+          <AnimPlayer {animPath} {spritePath} bind:palette />
+        {:else if character}
+          <Overview {character} onopen={openTab} />
         {:else}
           <Welcome
             {recent}
@@ -225,6 +279,11 @@
   }
   .tab.active { background: var(--editor); color: var(--text); box-shadow: inset 0 1px 0 var(--accent); margin-bottom: -1px; }
   .tab img { width: 14px; height: 14px; }
+  .tab-open { display: flex; align-items: center; gap: 6px; height: 100%; white-space: nowrap; }
+  .tab:has(.tab-close) { padding-right: 6px; }
+  .tab-close { display: grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius); color: var(--muted); visibility: hidden; }
+  .tab.active .tab-close, .tab:hover .tab-close { visibility: visible; }
+  .tab-close:hover { background: var(--hover); color: var(--text); }
 
   .banner {
     flex: none;
@@ -236,6 +295,7 @@
   .dismiss:hover { background: var(--hover); color: var(--text); }
 
   .content { flex: 1; min-height: 0; overflow: auto; }
+  .content.fill { overflow: hidden; }
   .panel { flex: 0 0 200px; min-height: 0; }
 
   .backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgba(0, 0, 0, 0.35); }

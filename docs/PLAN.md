@@ -172,9 +172,9 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 - **Exit criteria:** usable daily for CNS/ZSS editing in VS Code.
 
 ### Phase 3 — Editor MVP: viewer (3–4 weeks)
-- [ ] Open project from `.def`; project tree
-- [ ] Sprite browser (group/index grid, zoom, axis display, palette switch)
-- [ ] Animation player (play/pause/step, loop, Clsn overlay, onion skin)
+- [x] Open project from `.def`; project tree
+- [x] Sprite browser (group/index grid, zoom, axis display, palette switch; SFF palettes only until the ACT reader lands)
+- [x] Animation player (play/pause/step, loop, Clsn overlay, onion skin; blend modes approximated on canvas)
 - [ ] Monaco editor wired to the LSP for CNS/ST/CMD/ZSS
 - [ ] Cross-navigation: click `anim = 200` → opens action 200
 - **Exit criteria:** a creator can browse any corpus character comfortably.

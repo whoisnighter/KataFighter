@@ -3,7 +3,10 @@
   import FileIcon, { fileIconFor, type FileIconName } from "./FileIcon.svelte";
   import type { Character, FileInfo } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
 
-  let { character, onclose }: { character: Character; onclose: () => void } = $props();
+  let { character, onclose, onopen }: { character: Character; onclose: () => void; onopen: (role: string) => void } = $props();
+
+  // Files with a viewer open it on click; the rest show the overview.
+  const viewable = (f: FileInfo) => !!f.path && (f.role === "sprite" || f.role === "anim");
 
   type Group = { label: string; icon: FileIconName; files: FileInfo[] };
 
@@ -50,10 +53,10 @@
     <FileIcon name="folder" />
     <span class="root-name">{character.displayName || character.name}</span>
   </div>
-  <div class="row file" title={character.defPath}>
+  <button class="row file" title={character.defPath} onclick={() => onopen("def")}>
     <FileIcon name="def" />
     <span class="name">{baseName(character.defPath)}</span>
-  </div>
+  </button>
 
   {#each groups as g}
     <button class="row group" onclick={() => (collapsed[g.label] = !collapsed[g.label])}>
@@ -63,11 +66,16 @@
     </button>
     {#if !collapsed[g.label]}
       {#each g.files as f}
-        <div class="row file indent" class:missing={!f.path} title={`${f.path || "not found"}\n${f.summary}`}>
+        <button
+          class="row file indent"
+          class:missing={!f.path}
+          title={`${f.path || "not found"}\n${f.summary}${viewable(f) ? "\nClick to open the viewer" : ""}`}
+          onclick={() => onopen(viewable(f) ? f.role : "def")}
+        >
           <FileIcon name={fileIconFor(f.role, f.name)} />
           <span class="name">{f.name}</span>
           <span class="desc">{f.role}</span>
-        </div>
+        </button>
       {/each}
     {/if}
   {/each}

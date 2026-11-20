@@ -19,9 +19,9 @@ Wails v3 application: Go services in `services/`, Svelte 5 + TypeScript frontend
 | Path | What |
 |---|---|
 | `main.go` | App and the frameless main window (the title bar is drawn by the frontend) |
-| `services/` | `ProjectService`: `Mode`, `ChooseDef` (native dialog), `Open` (loads a character through `formats`: files + problems) |
+| `services/` | `ProjectService`: `Mode`, `ChooseDef` (native dialog), `Open` (loads a character through `formats`: files + problems). `ViewerService`: `Sprites`, `SpriteImage` (PNG data URL, optional palette), `Actions` (AIR, ready to draw); files are cached by path and mtime |
 | `frontend/src/App.svelte` | Shell: title bar, Explorer, tab area, Problems panel, status bar, shortcuts |
-| `frontend/src/lib/` | Shell parts: `TitleBar` (menus, window buttons), `Explorer`, `Welcome` (recent list), `Overview`, `Problems`, `StatusBar`, `QuickOpen` (path input) |
+| `frontend/src/lib/` | Shell parts: `TitleBar` (menus, window buttons), `Explorer`, `Welcome` (recent list), `Overview`, `Problems`, `StatusBar`, `QuickOpen` (path input). Viewers: `SpriteBrowser`, `AnimPlayer`, `PaletteSelect`; `sprites.ts` caches sprite images |
 | `build/` | Wails build assets (icons, Windows/macOS/Linux packaging). Metadata lives in `build/config.yml`; run `wails3 task common:update:build-assets` after editing it |
 
 ## Build and run
@@ -41,5 +41,5 @@ go test ./...       # service tests; corpus tests skip if ikemen/release is empt
 `wails3 task browser` builds with `-tags server` and serves the whole app, Go services included, at **http://localhost:34115** (`BROWSER_PORT=xxxx` to change). No native window opens and nothing takes focus, so an agent or a test runner can drive the real app from any browser and take screenshots.
 
 - `Mode()` returns `"browser"`: the window buttons are hidden and *File → Open Character…* (Ctrl+O) shows a path box instead of the native dialog.
-- `/?def=<absolute path to a .def>` opens a character directly.
+- `/?def=<absolute path to a .def>` opens a character directly; add `&view=sprites` or `&view=anim` to open a viewer tab.
 - The server embeds `frontend/dist` at build time: restart the task after frontend changes.

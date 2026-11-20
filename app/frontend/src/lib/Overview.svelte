@@ -2,12 +2,19 @@
   import FileIcon, { fileIconFor } from "./FileIcon.svelte";
   import type { Character } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
 
-  let { character }: { character: Character } = $props();
+  let { character, onopen }: { character: Character; onopen?: (view: "sprites" | "anim") => void } = $props();
+  const has = (role: string) => !!character.files?.find((f) => f.role === role)?.path;
 </script>
 
 <div class="overview">
   <h1>{character.displayName || character.name}</h1>
   <p class="sub">{character.author ? `by ${character.author}` : "Unknown author"}</p>
+  {#if onopen}
+    <div class="open">
+      <button class="btn" disabled={!has("sprite")} onclick={() => onopen("sprites")}><FileIcon name="sprite" size={14} />Sprites</button>
+      <button class="btn" disabled={!has("anim") || !has("sprite")} onclick={() => onopen("anim")}><FileIcon name="anim" size={14} />Animations</button>
+    </div>
+  {/if}
 
   <h2>Properties</h2>
   <table class="props">
@@ -39,6 +46,8 @@
   .overview { padding: 24px 32px 32px; max-width: 960px; }
   h1 { margin: 0; font-size: 22px; font-weight: 600; color: var(--text-strong); }
   .sub { margin: 4px 0 0; color: var(--muted); }
+  .open { display: flex; gap: 8px; margin-top: 16px; }
+  .open .btn { display: inline-flex; align-items: center; gap: 6px; }
   h2 {
     margin: 28px 0 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
     text-transform: uppercase; color: var(--muted);

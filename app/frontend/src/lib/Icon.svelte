@@ -14,6 +14,10 @@
     sidebar: "M2 3h12v10H2zM6 3v10",
     panel: "M2 3h12v10H2zM2 10h12",
     info: "M8 1.8a6.2 6.2 0 1 0 0 12.4A6.2 6.2 0 0 0 8 1.8zM8 7v4.5M8 4.8v.4",
+    play: "M5 3.5v9l7-4.5z",
+    pause: "M5.5 3.5v9M10.5 3.5v9",
+    "step-back": "M4 3.5v9M12.5 3.5v9L6 8z",
+    "step-forward": "M12 3.5v9M3.5 3.5v9L10 8z",
   } as const;
   export type IconName = keyof typeof icons;
 </script>
