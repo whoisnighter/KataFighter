@@ -96,6 +96,22 @@ Verified:
 
 Not yet: an AIR writer (lossless round-trip, Phase 4).
 
+## ACT and SND (`src/image.go`, `src/sound.go`, `src/char.go`)
+
+| Function | Where | Notes |
+|---|---|---|
+| `readActPalette` | `image.go:613` | Pure. Reads up to 768 bytes and accepts short files. Colors are stored **in reverse** (the first color is index 255). Index 0 is transparent |
+| `Char.loadPalettes` | `char.go:4385` | Engine state. SFF v1: the ACT files are the palettes. SFF v2: `palN` replaces SFF palette 1,N when the ACT loads, and falls back to the SFF palette when it does not |
+| `LoadSnd` / `LoadSndFiltered` | `sound.go:793`, `:810` | `ElecbyteSnd\0` header, then a chain of 16-byte subheaders (next, length, group, number) followed by the WAV. Skips negative keys and duplicate keys (logged). A subheader that cannot be read fails the whole file |
+| `readSound` | `sound.go:706` | Rejects sizes under 128 bytes, then decodes the WAV to the end with `beep`. A sound that fails to play is disabled and logged in the console |
+
+### Status: ACT and SND extracted (2026-11-20)
+
+- `formats/act`: `readActPalette` ported as is. `Short()` reports files with fewer than 256 colors, which Ikemen accepts without a warning.
+- `formats/snd`: header, subheader chain, the negative and duplicate key rules, and the size check. The WAV data is kept as bytes and its RIFF header is parsed (`ParseWAV`). **Not ported:** the full `beep` decode test, so a sound whose header is valid may still be disabled by Ikemen. An unreadable subheader is an error diagnostic, and the sounds read before it are kept. A subheader chain that loops back is cut short with a warning.
+- `Char.loadPalettes` is mirrored in the app's palette list (`paletteOptions` in `app/frontend/src/lib/sprites.ts`): slot N is the DEF's ACT file when one loads, otherwise SFF palette 1,N.
+- Verified: all 9 `.snd` files in the v1.0.0 release load with 0 diagnostics (KFM: 12 sounds). The release has no ACT files, so ACT is covered by unit tests only.
+
 ## DEF and the CNS constant sections (`char.go:3747–4385`, `common.go`)
 
 `Char.load` reads the DEF, then the `[Data]`, `[Size]`, `[Velocity]`, `[Movement]`, `[Quotes]`, `[Constants]` and `[RemapPreset X]` sections of the CNS file, writing straight into engine state (`sys.cgi`, `Char`). The parsing mechanics underneath are small and pure:

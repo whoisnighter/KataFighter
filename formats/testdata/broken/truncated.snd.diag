@@ -1,0 +1,4 @@
+truncated.snd: warning: duplicate sound key 0,0 (index 1 ignored)
+truncated.snd: warning: sound 1,0 can't be read: not a RIFF/WAVE file
+truncated.snd: warning: sound 2,0 can't be read: 244 bytes declared but the file ends after 144
+truncated.snd: error: sound 4: cannot read subheader at offset 982 (header declares 5 sounds); Ikemen rejects the file

@@ -22,6 +22,7 @@ import (
 	"github.com/whoisnighter/KataFighter/formats/def"
 	"github.com/whoisnighter/KataFighter/formats/diag"
 	"github.com/whoisnighter/KataFighter/formats/sff"
+	"github.com/whoisnighter/KataFighter/formats/snd"
 	"github.com/whoisnighter/KataFighter/formats/zss"
 )
 
@@ -36,6 +37,11 @@ func load(path string) (ds []diag.Diagnostic, err error) {
 	case ".sff":
 		var f *sff.File
 		if f, err = sff.Open(path, sff.Options{Character: true}); f != nil {
+			ds = f.Diagnostics
+		}
+	case ".snd":
+		var f *snd.File
+		if f, err = snd.Open(path); f != nil {
 			ds = f.Diagnostics
 		}
 	case ".air":

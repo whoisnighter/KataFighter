@@ -1,6 +1,6 @@
 // Command kf is a debugging CLI for katafighter-formats.
 //
-//	kf inspect [-char] <file.def|.sff|.air|.cns|.st|.cmd|.zss>  print a summary and diagnostics
+//	kf inspect [-char] <file.def|.sff|.air|.snd|.act|.cns|.st|.cmd|.zss>  print a summary and diagnostics
 //	kf dump [-char] [-pal N] <file.sff> <outdir>   write every sprite as <group>_<number>.png
 package main
 
@@ -13,11 +13,13 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/whoisnighter/KataFighter/formats/act"
 	"github.com/whoisnighter/KataFighter/formats/air"
 	"github.com/whoisnighter/KataFighter/formats/cns"
 	"github.com/whoisnighter/KataFighter/formats/def"
 	"github.com/whoisnighter/KataFighter/formats/diag"
 	"github.com/whoisnighter/KataFighter/formats/sff"
+	"github.com/whoisnighter/KataFighter/formats/snd"
 	"github.com/whoisnighter/KataFighter/formats/zss"
 )
 
@@ -45,7 +47,7 @@ func loadStates(path string) (string, []diag.Diagnostic, error) {
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
-  kf inspect [-char] [-engine DIR] <file.def|.sff|.air|.cns|.st|.cmd|.zss>
+  kf inspect [-char] [-engine DIR] <file.def|.sff|.air|.snd|.act|.cns|.st|.cmd|.zss>
   kf dump [-char] [-pal N] <file.sff> <outdir>
 
   -char   treat the file as a character's main SFF (SFF v1 palette rules)
@@ -90,6 +92,10 @@ func inspect(path string, char bool, engine string) error {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".air":
 		return inspectAir(path)
+	case ".snd":
+		return inspectSnd(path)
+	case ".act":
+		return inspectAct(path)
 	case ".def":
 		return inspectDef(path, engine)
 	case ".cns", ".st", ".cmd", ".const", ".zss":
@@ -179,6 +185,40 @@ func inspectAir(path string) error {
 	fmt.Printf("diagnostics %d\n", len(f.Diagnostics))
 	for _, d := range f.Diagnostics {
 		fmt.Println("  " + d.String())
+	}
+	return nil
+}
+
+func inspectSnd(path string) error {
+	f, err := snd.Open(path)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("file      %s\nversion   %d.%d\nsounds    %d (header says %d)\n",
+		path, f.Version[0], f.Version[1], len(f.Sounds), f.Declared)
+	fmt.Println("sounds (group,number: format):")
+	for i, k := range f.Keys() {
+		if i >= 15 {
+			fmt.Printf("  ... %d more\n", len(f.Sounds)-i)
+			break
+		}
+		fmt.Printf("  %5d,%-3d %s\n", k[0], k[1], f.Sound(k[0], k[1]).WAV)
+	}
+	fmt.Printf("diagnostics %d\n", len(f.Diagnostics))
+	for _, d := range f.Diagnostics {
+		fmt.Println("  " + d.String())
+	}
+	return nil
+}
+
+func inspectAct(path string) error {
+	p, err := act.Load(path)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("file      %s\ncolors    %d of 256\n", path, p.Read)
+	if p.Short() {
+		fmt.Println("warning   file is shorter than 768 bytes; missing colors are transparent black")
 	}
 	return nil
 }
@@ -286,6 +326,22 @@ func inspectDef(path, engine string) error {
 			fmt.Printf("anim        error: %v\n", err)
 		} else {
 			fmt.Printf("anim        %d actions, %d diagnostics\n", len(a.Actions), len(a.Diagnostics))
+		}
+	}
+	if p := d.Find(f.Sound, engine); p != "" {
+		if s, err := snd.Open(p); err != nil {
+			fmt.Printf("sound       error: %v\n", err)
+		} else {
+			fmt.Printf("sound       %d sounds, %d diagnostics\n", len(s.Sounds), len(s.Diagnostics))
+		}
+	}
+	for i := 1; i <= def.PaletteMax; i++ {
+		if p := d.Find(f.Pal[i], engine); p != "" {
+			if a, err := act.Load(p); err != nil {
+				fmt.Printf("pal%-8d error: %v\n", i, err)
+			} else if a.Short() {
+				fmt.Printf("pal%-8d only %d of 256 colors\n", i, a.Read)
+			}
 		}
 	}
 	// Parse the text files and collect their diagnostics.
