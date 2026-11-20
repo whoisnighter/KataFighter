@@ -137,11 +137,28 @@ func Parse(src string, opt Options) *Def {
 	// one; a plain one applies once and does not block the localized one.
 	done := map[string]bool{}
 	compileInfo, compileFiles := true, true
+	// stray reports text before the first section or between sections that
+	// is not a section header: Ikemen ignores it silently.
+	stray := func(from, to int) {
+		for k := from; k < to && k < len(lines); k++ {
+			if l := strings.TrimSpace(strings.SplitN(lines[k], ";", 2)[0]); l != "" {
+				if strings.HasPrefix(l, "[") {
+					dl.Warnf(diag.At(k+1, 1), "header-not-closed", "section header not closed with ']' (ignored)")
+				} else {
+					dl.Warnf(diag.At(k+1, 0), "outside-section", "text outside any [section] is ignored")
+				}
+				return
+			}
+		}
+	}
 	for i := 0; i < len(lines); {
+		start := i
 		s := text.ReadSection(lines, raw, &i)
 		if s == nil {
+			stray(start, len(lines))
 			break
 		}
+		stray(start, s.Line-1)
 		d.Sections = append(d.Sections, s)
 		for _, e := range s.Entries {
 			if e.Dup {

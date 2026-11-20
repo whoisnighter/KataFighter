@@ -1,0 +1,7 @@
+bad.air:3: warning: Clsn2 declares 3 boxes but only 1 follow
+bad.air:6: warning: action 1 has no valid frames
+bad.air:8: warning: integer outside int32 range: 99999999999
+bad.air:7: warning: duplicate action 0 (ignored)
+bad.air:12: warning: invalid Copy Action number "xyz"
+bad.air:11: warning: action 3 has no valid frames
+bad.air:9: warning: action 2: Copy Action 77 cannot be resolved; action removed

@@ -1,0 +1,1 @@
+binary.zss:1:1: error: expected a [StateDef] or [Function] section, found "t\xbd\xc0@b\x16" [syntax]

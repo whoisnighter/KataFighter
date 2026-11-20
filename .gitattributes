@@ -4,3 +4,6 @@
 *.act binary
 *.png binary
 *.exe binary
+
+# Intentionally broken samples: keep bytes exactly as written
+formats/testdata/broken/binary.* binary

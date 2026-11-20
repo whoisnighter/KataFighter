@@ -28,6 +28,7 @@ Go readers/writers for DEF, SFF, AIR, CNS/ST, CMD, ZSS, SND, ACT. Used by [app/]
 | `cns/` | CNS / ST / CMD parser: sections, `[Statedef]` → controllers → triggers (parsed with `expr`), `[Command]`; diagnostics for what Ikemen rejects or ignores |
 | `zss/` | ZSS parser: `[StateDef]` / `[Function]`, controllers, if/else, switch, for, while, let, call, block attributes |
 | `internal/text/` | MUGEN-style `Atoi`/`Atof`/`SectionName` and INI sections (first key wins, Shift_JIS, natural sort) from Ikemen. **Every text parser must use these**, never `strconv`, so numbers parse like the engine |
+| `brokentest/` | Runs every reader over `testdata/broken/` and snapshot-tests the diagnostics (`.diag` files) |
 | `cmd/kf/` | Debug CLI: `kf inspect <file.def\|.sff\|.air\|.cns\|.cmd\|.zss>` (a DEF loads and checks the whole character), `kf dump <file.sff> <outdir>` (`-char` for a character's main SFF, `-pal N` to pick a palette) |
 
 Parsers check syntax and engine rules only. Names of controllers and triggers are checked against [lsp/schema](../lsp/AGENTS.md) by the LSP, not here.
@@ -43,5 +44,6 @@ go run ./cmd/kf dump -char ../ikemen/release/<build>/chars/kfm/kfm.sff out/
 
 Golden files and license-safe samples only. The KFM corpus is read from `ikemen/release/` and is not committed.
 
+- `broken/`: hand-written malformed files (DEF, AIR, CNS, ZSS, SFF, random bytes). Each has a `.diag` snapshot; readers must never panic on them. Regenerate with `go test ./brokentest -update`.
 - `golden/sff/`: one manifest per release `.sff` (sprite keys, sizes, axes, formats, palette links and a hash of the decoded pixels). Hashes only, never pixels.
 - The decoder oracle (`sff/oracle_test.go`) builds Ikemen's own decoders from `ikemen/source` in a temp dir; it needs the submodule and the `go` tool.

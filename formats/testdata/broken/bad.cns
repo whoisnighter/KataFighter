@@ -1,0 +1,23 @@
+[Statedef 200]
+type = S
+
+[State 200, no type]
+trigger1 = time = 0
+
+[State 200, no trigger1]
+type = Null
+trigger2 = 1
+
+[State 200, bad expressions]
+type = Null
+trigger1 = (time = 0
+trigger1 = stateno = [1, 2
+trigger1 = command = "unclosed
+trigger2 =
+triggerX = 1
+foo bar = 1
+var(1 = 2
+
+[State 5
+[Statedef 200]
+[Statedef abc]

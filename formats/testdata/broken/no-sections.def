@@ -1,0 +1,3 @@
+; A DEF without any section header
+name = "Nobody"
+sprite = x.sff

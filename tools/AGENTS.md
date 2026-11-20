@@ -2,7 +2,16 @@
 
 ↑ [Root](../AGENTS.md)
 
-Go module `github.com/whoisnighter/KataFighter/tools`. These are build-time generators, not shipped in the app.
+Go module `github.com/whoisnighter/KataFighter/tools`. These are build-time generators and developer helpers, not shipped in the app.
+
+## fetchcorpus/
+
+Downloads the Ikemen GO release used as test corpus into `ikemen/release/` (see [ikemen/](../ikemen/AGENTS.md)). The URL and SHA-256 are pinned in `main.go`; it does nothing if the release is already there. CI caches the result.
+
+```sh
+cd tools
+go run ./fetchcorpus
+```
 
 ## schemagen/
 

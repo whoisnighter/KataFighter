@@ -242,15 +242,24 @@ func (p *parser) col(line int, s string) int {
 func (p *parser) parse() {
 	var cur *Statedef
 	seen := map[string]int{} // statedef number text -> header line
+	stray := false           // inside a run of text outside any section
 	for i := 0; i < len(p.lines); {
 		name, sub := text.SectionName(p.lines[i])
 		if name == "" {
-			if l := stripComment(p.lines[i]); l != "" && strings.HasPrefix(l, "[") {
+			l := stripComment(p.lines[i])
+			switch {
+			case strings.HasPrefix(l, "["):
 				p.dl.Warnf(diag.At(i+1, p.col(i, "[")), "header-not-closed", "section header not closed with ']'")
+				stray = false
+			case l != "" && !stray:
+				// Ikemen ignores it silently; report each run once.
+				p.dl.Warnf(diag.At(i+1, 0), "outside-section", "text outside any [section] is ignored")
+				stray = true
 			}
 			i++
 			continue
 		}
+		stray = false
 		s := &Section{Name: name, Sub: strings.TrimSpace(sub), Line: i + 1}
 		i++
 		start := i

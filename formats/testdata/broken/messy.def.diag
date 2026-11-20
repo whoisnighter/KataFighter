@@ -1,0 +1,7 @@
+messy.def:2:1: warning: name should be in double quotes [unquoted-string]
+messy.def:3:1: warning: duplicate key "name" in [info] (ignored, the first one wins) [duplicate-key]
+messy.def:4:1: warning: localcoord width is 0 [localcoord-zero]
+messy.def:11:1: warning: palette slot 0 for a is outside 1..100; Ikemen uses 1 [keymap-range]
+messy.def:12:1: warning: palette slot 9999 for b is outside 1..100; Ikemen uses 1 [keymap-range]
+messy.def:13: warning: duplicate section [info] (ignored, the first one wins) [duplicate-section]
+messy.def:15:1: warning: section header not closed with ']' (ignored) [header-not-closed]

@@ -14,7 +14,7 @@ Ikemen GO source as a git submodule. Don't edit it.
 
 ## release/ (git-ignored)
 
-Official builds from https://github.com/ikemen-engine/Ikemen-GO/releases, unzipped here, e.g. `release/Ikemen_GO-v1.0.0-windows/`. Used for:
+Official builds from https://github.com/ikemen-engine/Ikemen-GO/releases, unzipped here, e.g. `release/Ikemen_GO-v1.0.0-windows/`. `cd tools && go run ./fetchcorpus` downloads that one (URL and SHA-256 pinned in [tools/fetchcorpus](../tools/AGENTS.md); update them when bumping the version). Used for:
 - the KFM test corpus (`chars/kfm*`: main `.sff` files are v2, `intro`/`ending` are v1)
 - reference output for golden tests
 - the "Test" button ([Phase 5](../docs/PLAN.md#phase-5--test-integration-23-weeks))

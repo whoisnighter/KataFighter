@@ -1,0 +1,15 @@
+[Info]
+name = Unquoted Name
+name = "Second name"
+localcoord = 0, 240
+[Files]
+sprite = missing.sff
+st = a.cns
+st10 = c.cns
+st2 = b.cns
+[Palette Keymap]
+a = 0
+b = 9999
+[Info]
+name = "ignored"
+[Unclosed

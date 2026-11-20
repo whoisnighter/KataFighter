@@ -1,0 +1,19 @@
+[StateDef 100; type: S]
+if time = 0 {
+	velSet{x: 0 y: 1}
+	var(1) + 1;
+	break;
+[StateDef 100;]
+switch stateNo {
+case 1:
+	null{}
+default:
+default:
+}
+[Function f(a, a) _]
+persistent(2) if 1 { }
+for i = 1 {
+}
+let a, b = 1;
+call ;
+[Something]
