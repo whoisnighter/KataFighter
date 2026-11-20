@@ -106,9 +106,9 @@ func inspect(path string, char bool) error {
 			fmt.Printf("  %3d: %d,%d  %d%s\n", i, p.Group, p.Number, p.NumColors, link)
 		}
 	}
-	fmt.Printf("warnings  %d\n", len(f.Warnings))
-	for _, w := range f.Warnings {
-		fmt.Println("  " + w)
+	fmt.Printf("diagnostics %d\n", len(f.Diagnostics))
+	for _, d := range f.Diagnostics {
+		fmt.Println("  " + d.String())
 	}
 	return nil
 }
@@ -179,6 +179,6 @@ func dump(path, out string, char bool, palNo int) error {
 		}
 		n++
 	}
-	fmt.Printf("wrote %d sprites to %s (%d warnings)\n", n, out, len(f.Warnings))
+	fmt.Printf("wrote %d sprites to %s (%d diagnostics)\n", n, out, len(f.Diagnostics))
 	return nil
 }

@@ -40,8 +40,8 @@ func TestCorpusLoads(t *testing.T) {
 			if len(f.Sprites) != int(f.Header.NumberOfSprites) {
 				t.Errorf("loaded %d sprites, header says %d", len(f.Sprites), f.Header.NumberOfSprites)
 			}
-			for _, w := range f.Warnings {
-				t.Log("warning:", w)
+			for _, w := range f.Diagnostics {
+				t.Log(w)
 			}
 			for _, s := range f.Sprites {
 				if len(s.Pix) > 0 && len(s.Pix) != int(s.Size[0])*int(s.Size[1]) {

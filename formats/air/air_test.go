@@ -53,7 +53,7 @@ func TestFrameFields(t *testing.T) {
 	if a.TotalTime != 3 || a.LoopTime != 3 || a.PreLoopTime != 0 {
 		t.Errorf("timing total=%d loop=%d pre=%d", a.TotalTime, a.LoopTime, a.PreLoopTime)
 	}
-	if len(f.Diagnostics) != 1 || f.Diagnostics[0].Line != 6 {
+	if len(f.Diagnostics) != 1 || f.Diagnostics[0].Range.Start.Line != 6 {
 		t.Errorf("diagnostics = %v", f.Diagnostics)
 	}
 }

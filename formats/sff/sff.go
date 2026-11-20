@@ -17,7 +17,7 @@
 //   - Decoded pixels are kept in memory (Sprite.Pix / Sprite.RGBA) instead of
 //     being uploaded to GPU textures.
 //   - Engine globals (sys, loading cancel, file cache) are removed.
-//   - Errors while decoding a single sprite are recorded in File.Warnings and
+//   - Errors while decoding a single sprite are recorded in File.Diagnostics and
 //     loading continues (upstream aborts the whole file, or panics on a short
 //     read in readV2). Header errors are still fatal.
 //   - The isActPal option of loadSff (runtime ACT palette override) is not ported.
@@ -38,6 +38,8 @@ import (
 	"image/png"
 	"io"
 	"os"
+
+	"github.com/whoisnighter/KataFighter/formats/diag"
 )
 
 // Version holds the SFF version as {hi, lo1, lo2, lo3}, e.g. {2,0,1,0} = 2.0.1.0.
@@ -130,7 +132,9 @@ type File struct {
 	Header   Header
 	Sprites  []*Sprite
 	Palettes []*Palette
-	Warnings []string
+	// Diagnostics are per-sprite problems; loading continues past them.
+	// They have no line positions (SFF is binary).
+	Diagnostics []diag.Diagnostic
 
 	byKey map[[2]uint16]*Sprite
 }
@@ -171,11 +175,15 @@ func Open(path string, opt Options) (*File, error) {
 		return nil, err
 	}
 	defer fh.Close()
-	return Load(fh, opt)
+	f, err := Load(fh, opt)
+	if f != nil {
+		diag.SetFile(f.Diagnostics, path)
+	}
+	return f, err
 }
 
 func (f *File) warnf(format string, a ...any) {
-	f.Warnings = append(f.Warnings, fmt.Sprintf(format, a...))
+	f.Diagnostics = append(f.Diagnostics, diag.Diagnostic{Severity: diag.Warning, Message: fmt.Sprintf(format, a...)})
 }
 
 // Load reads a whole SFF file.

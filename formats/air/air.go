@@ -34,6 +34,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/whoisnighter/KataFighter/formats/diag"
 	"github.com/whoisnighter/KataFighter/formats/internal/text"
 )
 
@@ -95,36 +96,10 @@ type Action struct {
 	TotalTime, LoopTime, PreLoopTime int32
 }
 
-// Severity of a diagnostic.
-type Severity int
-
-const (
-	Warning Severity = iota
-	Error
-)
-
-// Diagnostic is a problem found while parsing. Line is 1-based (0 = whole file).
-type Diagnostic struct {
-	Line     int
-	Severity Severity
-	Message  string
-}
-
-func (d Diagnostic) String() string {
-	sev := "warning"
-	if d.Severity == Error {
-		sev = "error"
-	}
-	if d.Line > 0 {
-		return fmt.Sprintf("%d: %s: %s", d.Line, sev, d.Message)
-	}
-	return fmt.Sprintf("%s: %s", sev, d.Message)
-}
-
 // File is a parsed AIR file (or several merged).
 type File struct {
 	Actions     map[int32]*Action
-	Diagnostics []Diagnostic
+	Diagnostics []diag.Diagnostic
 }
 
 // Numbers returns the action numbers in ascending order.
@@ -145,6 +120,7 @@ func Load(path string) (*File, error) {
 	}
 	f := Parse(string(text.StripBOM(b)))
 	f.Resolve()
+	diag.SetFile(f.Diagnostics, path)
 	return f, nil
 }
 
@@ -189,7 +165,7 @@ func (f *File) Resolve() {
 			break
 		}
 		if a.CopyAction >= 0 {
-			f.diag(a.Line, Warning, "action %d: Copy Action %d cannot be resolved; action removed", no, a.CopyAction)
+			f.warn(a.Line, "action %d: Copy Action %d cannot be resolved; action removed", no, a.CopyAction)
 			toDelete = append(toDelete, no)
 		}
 	}
@@ -198,8 +174,8 @@ func (f *File) Resolve() {
 	}
 }
 
-func (f *File) diag(line int, sev Severity, format string, a ...any) {
-	f.Diagnostics = append(f.Diagnostics, Diagnostic{Line: line, Severity: sev, Message: fmt.Sprintf(format, a...)})
+func (f *File) warn(line int, format string, a ...any) {
+	f.Diagnostics = append(f.Diagnostics, diag.Diagnostic{Range: diag.At(line, 0), Severity: diag.Warning, Message: fmt.Sprintf(format, a...)})
 }
 
 type parser struct {
@@ -210,7 +186,7 @@ type parser struct {
 func (p *parser) atoi(s string, line int) int32 {
 	n, overflow := text.Atoi(s)
 	if overflow {
-		p.f.diag(line, Warning, "integer outside int32 range: %s", strings.TrimSpace(s))
+		p.f.warn(line, "integer outside int32 range: %s", strings.TrimSpace(s))
 	}
 	return n
 }
@@ -223,14 +199,14 @@ func (p *parser) readTableEntry(i *int) *Action {
 		if a != nil {
 			// Duplicate action numbers: the first one wins, even a Copy Action
 			if existing := p.f.Actions[no]; existing != nil {
-				p.f.diag(a.Line, Warning, "duplicate action %d (ignored)", no)
+				p.f.warn(a.Line, "duplicate action %d (ignored)", no)
 				return existing
 			}
 			// An empty action takes the very next action found in the file
 			logged := false
 			for len(a.Frames) == 0 && *i < len(p.lines) && a.CopyAction < 0 {
 				if !logged {
-					p.f.diag(a.Line, Warning, "action %d has no valid frames", no)
+					p.f.warn(a.Line, "action %d has no valid frames", no)
 					logged = true
 				}
 				if a2 := p.readTableEntry(i); a2 != nil {
@@ -295,7 +271,7 @@ func (p *parser) parseAction(i *int) *Action {
 			id, err := strconv.ParseInt(numStr, 10, 32)
 			if err != nil || numStr == "" {
 				a.CopyAction = -1 // invalid number: treated as empty
-				p.f.diag(lineNo, Warning, "invalid Copy Action number %q", numStr)
+				p.f.warn(lineNo, "invalid Copy Action number %q", numStr)
 			} else {
 				a.CopyAction = int32(id)
 			}
@@ -304,7 +280,7 @@ func (p *parser) parseAction(i *int) *Action {
 
 		af, msgs := p.parseFrame(line, lineNo)
 		for _, m := range msgs {
-			p.f.diag(lineNo, Warning, "%s", m)
+			p.f.warn(lineNo, "%s", m)
 		}
 
 		switch {
@@ -391,7 +367,7 @@ func (p *parser) parseAction(i *int) *Action {
 				(*i)++
 			}
 			if n < size {
-				p.f.diag(lineNo, Warning, "Clsn%c declares %d boxes but only %d follow", line[4], size, n)
+				p.f.warn(lineNo, "Clsn%c declares %d boxes but only %d follow", line[4], size, n)
 			}
 			(*i)-- // back up so the line after the last box is not skipped
 		}
