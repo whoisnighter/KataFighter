@@ -48,7 +48,12 @@ Verified:
 - KFM sprites, palette swaps, the PNG8 portrait and the v1 PCX intro export to PNG and look correct.
 - 30 s of fuzzing `Load` with no crash.
 
-Not yet verified: pixel-exact comparison against Ikemen's own rendering (golden tests, [PLAN §8](PLAN.md#8-testing-strategy)).
+### Golden tests (2026-11-20)
+
+- **Decoder oracle** (`formats/sff/oracle_test.go`): `RlePcxDecode`, `Rle8Decode`, `Rle5Decode` and `Lz5Decode` are pulled out of `ikemen/source/src/image.go` with `go/ast` and built in a temp dir next to a stub `Sprite`. Every compressed sprite of the release (76 PCX, 631 RLE8, 992 LZ5) is decoded by both and compared byte for byte: all match. Breaking one of our decoders on purpose makes the test fail. Nothing from Ikemen is committed.
+- **Manifests** (`formats/testdata/golden/sff/`): for each of the 49 release `.sff`, sprite keys, sizes, axes, formats, palette links and a hash of the decoded pixels. They catch regressions in the loader logic around the decoders (v1 palette heuristics, linked sprites, PNG paths), which the oracle does not cover.
+
+Not covered: Ikemen's GPU-side palette application. RLE5 does not occur in the corpus.
 
 ## AIR (`src/anim.go`, ~2400 lines)
 
@@ -109,6 +114,14 @@ DEF section rules:
 - Common files (`common.air`, `.cmd`, `.const`, `stcommon`) come from `sys.cfg.Common.*`, i.e. Ikemen's config, not from the character.
 
 **Verdict: easy.** Port the INI helpers into `internal/text` and build a `def` package that returns a plain struct (info, files, palettes, keymap) plus the CNS constant sections. ~1 day.
+
+### Status: DEF extracted (2026-11-20)
+
+- `formats/internal/text/ini.go`: `ReadIniSection`, `IniSection.Parse`, `ReadI32/F32/Bool`, `getText`, `decodeShiftJIS`, `compareNatural`. Sections keep every entry with its line and column, duplicates included, so they can be reported.
+- `formats/def`: one pass that merges what `Char.load` and `Compile` read. Language sections follow `Char.load` (a localized section applies once and blocks the plain one); `MugenVersion`, `IkemenVersion`, `cmd`, `st*` and `stcommon` come from the first plain section, as in `Compile`. `Find` mirrors `SearchFile` (DEF folder, engine folder, `data/`, case-insensitive fallback, no zip). `FindState` adds the `.zss` fallback of `stateCompile` (KFM's `common1.cns` is `data/common1.cns.zss`).
+- Diagnostics for what Ikemen silently accepts: unquoted names, duplicate keys and sections, keymap slots outside 1..100.
+- The CNS constant sections are read by `formats/cns` as plain sections; nothing interprets them yet.
+- Verified: the 4 KFM characters load with 0 diagnostics and every referenced file resolves.
 
 ## CNS / ZSS / CMD compiler (`compiler.go` 8.4k, `compiler_functions.go` 7.1k, `bytecode.go` 15.6k lines)
 
@@ -171,3 +184,16 @@ Known gaps, which are listed in the JSON:
 - 8 triggers are accepted by `expValue` but are not in `triggerMap` (`statetime`, `hitdefvar`, `debugmode`…). They are marked `origin: "other"`.
 
 **Effort:** DEF ~1 day. schemagen ~2–3 days. CNS parser + expressions ~1–2 weeks. ZSS blocks +1 week. CMD (`input.go` `ReadCommandSymbols`) has not been audited yet.
+
+### Status: parsers written (2026-11-20), strategy C step 1
+
+- `formats/expr`: the tokenizer (`tokenizerCS`) and the `isOperator` precedence chain, building nodes. Trigger-specific shapes are parsed by generic rules so the parser needs no trigger list:
+  - a name directly followed by a name is `Sub` (`vel x`, `p2bodydist y`);
+  - a redirection keyword followed by `,` is `Redirect` (`parent, time`, `helper(1), pos x`);
+  - `= [a, b]` / `(a, b)` is `Range`, and `(` without a comma falls back to parentheses, as in `expRange`;
+  - `x = y, ...` is `Compare` (`animelem = 2, >= 3`, `hitdefattr = SC, NA`). Inside parentheses or arguments an item is only taken when it starts with a comparison operator or is an attack attribute code, which is what `evaluateComparison` and `trgAttr` accept there;
+  - `:=` is `Assign`, with its value parsed at the `=` level like `_var`.
+- `formats/cns`: CNS / ST / CMD. Section grouping follows `stateCompileCNS`, entries follow `parseSection` with `ignoreMostErrors` (top-level `=`, `var(N) =` keys, names cut at the first space). Fatal Ikemen errors (missing `type`, missing `trigger1`, empty or unparsable trigger) are error diagnostics; ignored problems are warnings.
+- `formats/zss`: the whole file is tokenized once with `#` comments. Sections, params, `if/else`, `switch`, `for`, `while`, `let`, `call`, `break/continue` and the `ignorehitpause` / `persistent(N)` attributes follow the functions listed in the package header. Any name followed by `{` is a controller.
+- Not done: the rule that a top-level ZSS statement must end its line, the MUGEN "reverse order" quirks of `expPostNot`, `[StateDef const(...)]` resolution, and checking names against the schema (that is the LSP's job). The fidelity oracle (step 3) is still open.
+- Verified on the release: `kfm.cns` (58 states, 318 controllers), `kfm.cmd`, the `.const` files and all 16 `.zss` files (KFM ZSS + `data/`) parse with 0 diagnostics; every trigger name in `kfm.cns`/`kfm.cmd` is in `lsp/schema/ikemen.json`. `expr` and `zss` survive 20–30 s of fuzzing.

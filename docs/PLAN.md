@@ -157,11 +157,11 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 - **Exit criteria:** CI green on all three OSes; app window opens.
 
 ### Phase 1 — `katafighter-formats` read-only (3–5 weeks)
-- [ ] Audit & extract Ikemen GO parsers (Section 5)
-- [ ] DEF, SFF v2 (all compression modes), ACT, AIR, SND readers
-- [ ] CNS/ST/CMD/ZSS parsing into an AST with source positions
-- [ ] Diagnostics model (errors/warnings with file:line:col)
-- [ ] CLI `kf inspect <char.def>` for debugging
+- [x] Audit & extract Ikemen GO parsers (Section 5)
+- [ ] DEF, SFF v2 (all compression modes), ACT, AIR, SND readers (DEF, SFF v1+v2, AIR done; ACT, SND left)
+- [x] CNS/ST/CMD/ZSS parsing into an AST with source positions
+- [x] Diagnostics model (errors/warnings with file:line:col)
+- [x] CLI `kf inspect <char.def>` for debugging
 - **Exit criteria:** every character in the corpus loads without panic; sprite decode matches Ikemen output (pixel-compare golden tests).
 
 ### Phase 2 — `katafighter-lsp` + VS Code extension (3–4 weeks) → **first public release**
@@ -213,7 +213,7 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 ## 8. Testing Strategy
 
-- **Golden tests:** decoded sprites compared pixel-by-pixel with reference PNGs exported from Ikemen GO.
+- **Golden tests:** decoded sprites compared byte-by-byte with Ikemen GO's own decoders, extracted from `ikemen/source` at test time (`formats/sff/oracle_test.go`), plus committed per-sprite hash manifests (`formats/testdata/golden/`) to catch regressions in the loader.
 - **Round-trip tests:** read → write → read must produce identical data structures; text files byte-identical when unmodified.
 - **Corpus tests:** run all parsers over the corpus in CI; no panics allowed, diagnostics snapshot-tested.
 - **Fuzzing:** Go native fuzzing for binary readers (SFF, SND) to harden against malformed files.
@@ -260,6 +260,8 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 1. ~~Create the GitHub repository `KataFighter` (MIT) and push this plan.~~ Done.
 2. ~~Add Ikemen GO v1.0.0 as `ikemen/source` and audit SFF (Section 5).~~ Done, see `docs/upstream-audit.md`.
 3. ~~SFF spike: extract the SFF reader into `formats/sff`, with a CLI that dumps Kung Fu Man's sprites to PNG.~~ Done: v1 + v2, `kf inspect` / `kf dump`.
-4. Build the first golden test: compare decoded sprites with Ikemen output.
+4. ~~Build the first golden test: compare decoded sprites with Ikemen output.~~ Done: decoder oracle + hash manifests.
    - ~~AIR reader (`formats/air`) + shared text helpers.~~ Done.
 5. Set up `go.work` with `formats`, `lsp`, `app`; scaffold Wails v3 + Svelte app.
+6. ~~DEF reader, shared diagnostics model, CNS/ST/CMD and ZSS parsers.~~ Done (`formats/def`, `diag`, `expr`, `cns`, `zss`).
+7. ACT and SND readers; then CI (Phase 0) and the `lsp` module (Phase 2).

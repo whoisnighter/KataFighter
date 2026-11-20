@@ -20,17 +20,28 @@ Go readers/writers for DEF, SFF, AIR, CNS/ST, CMD, ZSS, SND, ACT. Used by [app/]
 
 | Path | What |
 |---|---|
+| `diag/` | Shared diagnostics model: severity, code, message, `file:line:col` range. **Every reader reports through it** |
+| `def/` | DEF reader: `[Info]`, `[Files]` (st order, pal/font/movelist), `[Palette Keymap]`, `[Map]`, language sections; `Find` / `FindState` resolve paths like Ikemen |
 | `sff/` | SFF v1 + v2 reader: sprites, palettes, linked sprites, export to `image.Image` |
 | `air/` | AIR reader: actions, frames, Clsn boxes, Copy Action, timing; `Parse` → `Merge` (common AIR) → `Resolve` |
-| `internal/text/` | MUGEN-style `Atoi`/`Atof`/`SectionName`… from Ikemen. **Every text parser must use these**, never `strconv`, so numbers parse like the engine |
-| `cmd/kf/` | Debug CLI: `kf inspect <file.sff\|file.air>`, `kf dump <file.sff> <outdir>` (`-char` for a character's main SFF, `-pal N` to pick a palette) |
+| `expr/` | Trigger/parameter expression lexer + parser → syntax tree with byte offsets. Generic: knows grammar keywords (redirections, attack attribute codes), never trigger names |
+| `cns/` | CNS / ST / CMD parser: sections, `[Statedef]` → controllers → triggers (parsed with `expr`), `[Command]`; diagnostics for what Ikemen rejects or ignores |
+| `zss/` | ZSS parser: `[StateDef]` / `[Function]`, controllers, if/else, switch, for, while, let, call, block attributes |
+| `internal/text/` | MUGEN-style `Atoi`/`Atof`/`SectionName` and INI sections (first key wins, Shift_JIS, natural sort) from Ikemen. **Every text parser must use these**, never `strconv`, so numbers parse like the engine |
+| `cmd/kf/` | Debug CLI: `kf inspect <file.def\|.sff\|.air\|.cns\|.cmd\|.zss>` (a DEF loads and checks the whole character), `kf dump <file.sff> <outdir>` (`-char` for a character's main SFF, `-pal N` to pick a palette) |
+
+Parsers check syntax and engine rules only. Names of controllers and triggers are checked against [lsp/schema](../lsp/AGENTS.md) by the LSP, not here.
 
 ```sh
 go test ./...                                     # corpus tests skip if ikemen/release is empty
-go test ./sff -run '^$' -fuzz FuzzLoad -fuzztime 30s
+go test ./sff -run Golden -update                 # after an intended change to what sff.Load returns
+go test ./sff -run '^$' -fuzz FuzzLoad -fuzztime 30s   # also FuzzParse in ./expr and ./zss
 go run ./cmd/kf dump -char ../ikemen/release/<build>/chars/kfm/kfm.sff out/
 ```
 
 ## testdata/
 
 Golden files and license-safe samples only. The KFM corpus is read from `ikemen/release/` and is not committed.
+
+- `golden/sff/`: one manifest per release `.sff` (sprite keys, sizes, axes, formats, palette links and a hash of the decoded pixels). Hashes only, never pixels.
+- The decoder oracle (`sff/oracle_test.go`) builds Ikemen's own decoders from `ikemen/source` in a temp dir; it needs the submodule and the `go` tool.
