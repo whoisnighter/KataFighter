@@ -1,6 +1,6 @@
 // Command kf is a debugging CLI for katafighter-formats.
 //
-//	kf inspect [-char] <file.def|file.sff|file.air>  print a summary and diagnostics
+//	kf inspect [-char] <file.def|.sff|.air|.cns|.st|.cmd|.zss>  print a summary and diagnostics
 //	kf dump [-char] [-pal N] <file.sff> <outdir>   write every sprite as <group>_<number>.png
 package main
 
@@ -14,13 +14,38 @@ import (
 	"strings"
 
 	"github.com/whoisnighter/KataFighter/formats/air"
+	"github.com/whoisnighter/KataFighter/formats/cns"
 	"github.com/whoisnighter/KataFighter/formats/def"
+	"github.com/whoisnighter/KataFighter/formats/diag"
 	"github.com/whoisnighter/KataFighter/formats/sff"
+	"github.com/whoisnighter/KataFighter/formats/zss"
 )
+
+// loadStates parses a CNS/ST/CMD (cns) or ZSS file and returns a one-line
+// summary and its diagnostics.
+func loadStates(path string) (string, []diag.Diagnostic, error) {
+	if strings.EqualFold(filepath.Ext(path), ".zss") {
+		f, err := zss.Load(path)
+		if err != nil {
+			return "", nil, err
+		}
+		return fmt.Sprintf("zss         %d states, %d functions", len(f.States), len(f.Functions)), f.Diagnostics, nil
+	}
+	f, err := cns.Load(path)
+	if err != nil {
+		return "", nil, err
+	}
+	ctrls := 0
+	for _, s := range f.States {
+		ctrls += len(s.Controllers)
+	}
+	return fmt.Sprintf("cns         %d sections, %d states, %d controllers, %d commands",
+		len(f.Sections), len(f.States), ctrls, len(f.Commands)), f.Diagnostics, nil
+}
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage:
-  kf inspect [-char] [-engine DIR] <file.def|file.sff|file.air>
+  kf inspect [-char] [-engine DIR] <file.def|.sff|.air|.cns|.st|.cmd|.zss>
   kf dump [-char] [-pal N] <file.sff> <outdir>
 
   -char   treat the file as a character's main SFF (SFF v1 palette rules)
@@ -67,6 +92,16 @@ func inspect(path string, char bool, engine string) error {
 		return inspectAir(path)
 	case ".def":
 		return inspectDef(path, engine)
+	case ".cns", ".st", ".cmd", ".const", ".zss":
+		summary, diags, err := loadStates(path)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("file        %s\n%s\ndiagnostics %d\n", path, summary, len(diags))
+		for _, d := range diags {
+			fmt.Println("  " + d.String())
+		}
+		return nil
 	}
 	f, err := sff.Open(path, sff.Options{Character: char})
 	if err != nil {
@@ -252,6 +287,32 @@ func inspectDef(path, engine string) error {
 		} else {
 			fmt.Printf("anim        %d actions, %d diagnostics\n", len(a.Actions), len(a.Diagnostics))
 		}
+	}
+	// Parse the text files and collect their diagnostics.
+	var textDiags []diag.Diagnostic
+	parse := func(name string, find func(string, string) string) {
+		p := find(name, engine)
+		if p == "" {
+			return
+		}
+		summary, ds, err := loadStates(p)
+		if err != nil {
+			fmt.Printf("%-11s error: %v\n", filepath.Base(p), err)
+			return
+		}
+		fmt.Printf("%-11s %s, %d diagnostics\n", filepath.Base(p), strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(summary, "zss"), "cns")), len(ds))
+		textDiags = append(textDiags, ds...)
+	}
+	parse(f.CNS, d.Find)
+	parse(f.CMD, d.Find)
+	for _, st := range f.ST {
+		if st != f.CNS {
+			parse(st, d.FindState)
+		}
+	}
+	parse(f.StCommon, d.FindState)
+	for _, dg := range textDiags {
+		fmt.Println("  " + dg.String())
 	}
 	fmt.Printf("diagnostics %d\n", len(d.Diagnostics))
 	for _, dg := range d.Diagnostics {
