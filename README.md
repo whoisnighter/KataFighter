@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/logo.svg" width="128" alt="KataFighter logo"></p>
+
 # KataFighter
 
 An open-source character editor for **[Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO)**, built with Go + Wails v3.

@@ -50,14 +50,26 @@ type Character struct {
 	Problems    []Problem  `json:"problems"`
 }
 
+// Mode reports how the app runs: "desktop" (native window) or "browser"
+// (server mode, see mode_server.go), so the UI can adapt (no native
+// dialogs or window buttons in the browser).
+func (s *ProjectService) Mode() string { return mode }
+
 // ChooseDef shows the native open dialog and returns the chosen DEF path,
 // or "" when the user cancels.
 func (s *ProjectService) ChooseDef() (string, error) {
-	return application.Get().Dialog.OpenFile().
+	if mode != "desktop" {
+		return "", fmt.Errorf("native dialogs are not available in %s mode; type the path instead", mode)
+	}
+	p, err := application.Get().Dialog.OpenFile().
 		SetTitle("Open character").
 		CanChooseFiles(true).
 		AddFilter("Character definition (*.def)", "*.def").
 		PromptForSingleSelection()
+	if err != nil && strings.Contains(err.Error(), "cancelled") {
+		return "", nil // the user closed the dialog
+	}
+	return p, err
 }
 
 // Open loads a character's DEF and every file it references.

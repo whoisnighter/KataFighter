@@ -1,4 +1,7 @@
 // Command katafighter is the KataFighter desktop app (Wails v3).
+//
+// Built normally it opens a native window. Built with -tags server it runs
+// as an HTTP server with no window (see app/AGENTS.md, "Browser mode").
 package main
 
 import (
@@ -30,13 +33,17 @@ func main() {
 		},
 	})
 
+	// The title bar is drawn by the frontend (menus, title, window
+	// buttons), like VS Code. Frameless keeps the native shadow, rounded
+	// corners and resize edges on Windows.
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "KataFighter",
 		Width:            1280,
 		Height:           800,
 		MinWidth:         800,
 		MinHeight:        500,
-		BackgroundColour: application.NewRGB(24, 24, 28),
+		Frameless:        true,
+		BackgroundColour: application.NewRGB(20, 22, 33),
 		URL:              "/",
 	})
 

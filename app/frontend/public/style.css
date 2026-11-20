@@ -1,38 +1,78 @@
-/* Design tokens. Components use these variables only. */
+/* Design tokens. Components use these variables only.
+   The palette follows the logo (docs/assets/logo.svg): navy surfaces,
+   blue for focus and hurtboxes, red/orange for errors and hitboxes. */
 :root {
-  --bg: #18181c;
-  --panel: #202026;
-  --panel-2: #2a2a32;
-  --border: #34343e;
-  --text: #e6e6ea;
-  --muted: #9a9aa6;
-  --accent: #e0a33a;
-  --error: #f06a6a;
-  --warning: #e0b44a;
-  --ok: #6ac98a;
-  --radius: 6px;
-  --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  --titlebar: #14161f;
+  --activity: #14161f;
+  --sidebar: #181a26;
+  --editor: #1d2030;
+  --panel: #181a26;
+  --statusbar: #14161f;
+  --raised: #262a3d;
+  --hover: #2a2e44;
+  --selection: #2b3a5c;
+  --border: #2a2d3f;
 
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 14px;
+  --text: #d8dcef;
+  --text-strong: #ffffff;
+  --muted: #8a90ad;
+  --faint: #5d627d;
+
+  --accent: #3fa9ff;        /* logo hurtbox blue */
+  --accent-text: #0b1020;
+  --strike: #ff3d5a;        /* logo hitbox red */
+  --strike-2: #ff9b3d;
+  --error: #ff5c74;
+  --warning: #ffb547;
+  --ok: #5fd39a;
+
+  --radius: 4px;
+  --ui: 13px;
+  --small: 12px;
+  --mono: "Cascadia Code", "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  font-size: var(--ui);
   color: var(--text);
-  background: var(--bg);
+  background: var(--editor);
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 
-html, body, #app { height: 100%; margin: 0; }
+html, body, #app { height: 100%; margin: 0; overflow: hidden; }
+
+body { user-select: none; -webkit-user-select: none; cursor: default; }
+
+input, textarea { user-select: text; -webkit-user-select: text; }
 
 button {
   font: inherit;
-  color: var(--text);
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 6px 12px;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
   cursor: pointer;
 }
-button:hover { border-color: var(--accent); }
-button.primary { background: var(--accent); border-color: var(--accent); color: #1a1408; font-weight: 600; }
+
+button.btn {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  background: var(--raised);
+  border: 1px solid var(--border);
+}
+button.btn:hover { background: var(--hover); }
+button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+button.btn.primary:hover { filter: brightness(1.08); }
 button:disabled { opacity: 0.5; cursor: default; }
+
+:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(138, 144, 173, 0.25); }
+::-webkit-scrollbar-thumb:hover { background: rgba(138, 144, 173, 0.4); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+.mono { font-family: var(--mono); font-size: var(--small); }
+.muted { color: var(--muted); }

@@ -57,6 +57,22 @@ tasks:
     cmds:
       - task: common:run:server
 
+  browser:
+    summary: Runs KataFighter in browser mode (no window) at http://localhost:34115
+    desc: |
+      Builds the server-mode binary (-tags server) and serves the full app,
+      Go services included, over HTTP. No native window opens, so agents and
+      headless tests can drive it from a browser without taking focus.
+      Override the port with BROWSER_PORT=xxxx.
+    deps:
+      - task: common:build:server
+        vars:
+          DEV: "true"
+    env:
+      WAILS_SERVER_PORT: '{{.BROWSER_PORT | default "34115"}}'
+    cmds:
+      - '"./{{.BIN_DIR}}/{{.APP_NAME}}-server{{exeExt}}"'
+
   build:docker:
     summary: Builds a Docker image for server mode deployment
     cmds:
