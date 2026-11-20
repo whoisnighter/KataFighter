@@ -473,7 +473,7 @@ func (f *File) readV1(r io.ReadSeeker, s *Sprite, offset int64, datasize uint32,
 		}
 	}
 	w, h := int(s.Size[0]), int(s.Size[1])
-	p, err := decodeSafe("pcx", func() []byte { return rlePcxDecode(px, w, h, bpl) })
+	p, err := decode("pcx", px, w, h, bpl)
 	if err != nil {
 		return err
 	}
@@ -541,11 +541,11 @@ func (f *File) readV2(r io.ReadSeeker, s *Sprite, offset int64, datasize uint32)
 	var err error
 	switch s.Format {
 	case FormatRLE8:
-		px, err = decodeSafe("rle8", func() []byte { return rle8Decode(px, w, h) })
+		px, err = decode("rle8", px, w, h, 0)
 	case FormatRLE5:
-		px, err = decodeSafe("rle5", func() []byte { return rle5Decode(px, w, h) })
+		px, err = decode("rle5", px, w, h, 0)
 	case FormatLZ5:
-		px, err = decodeSafe("lz5", func() []byte { return lz5Decode(px, w, h) })
+		px, err = decode("lz5", px, w, h, 0)
 	case FormatPNG8:
 		img, err := png.Decode(r)
 		if err != nil {

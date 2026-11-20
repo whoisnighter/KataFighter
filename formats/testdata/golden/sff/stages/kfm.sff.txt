@@ -1,0 +1,18 @@
+version 2.0.1.0 sprites 8 palettes 7
+# palette: index group,number colors link hash
+pal 0 9000,1 256 -1 ec47c416b962aba2
+pal 1 0,0 256 -1 62ae98918f38ab5a
+pal 2 1,0 256 -1 976b545cd161fa00
+pal 3 1,1 256 -1 c2b2be5311c5cfaa
+pal 4 10,0 256 -1 62aeaf2284c89f5a
+pal 5 11,0 256 -1 e81f29959cfd06de
+pal 6 15,0 256 -1 3ea2d4e7524751c2
+# sprite: index group,number WxH axis format depth pal link pixels
+spr 0 9000,1 240x100 0,0 png8 8 0 -1 8904181d0e16f4f1
+spr 1 0,0 480x130 240,-17 png8 8 1 -1 e0cb61bb40740546
+spr 2 1,0 282x170 141,0 png8 8 2 -1 1cc8004e08dc8071
+spr 3 1,1 282x60 141,59 png8 8 3 -1 d20fe8b793ea5b12
+spr 4 10,0 740x60 370,0 png8 8 4 -1 503142330bb9e7d3
+spr 5 11,0 650x34 325,33 png8 8 5 -1 06ca575076af7dc0
+spr 6 15,0 282x8 141,0 png8 8 6 -1 493404722290ea10
+spr 7 15,1 282x8 141,8 png8 8 6 -1 cae62201e5de415a

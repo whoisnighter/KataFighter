@@ -31,6 +31,32 @@ func decodeSafe(name string, f func() []byte) (p []byte, err error) {
 	return f(), nil
 }
 
+// onDecode, when set, sees every decoder call. Tests use it to compare our
+// decoders with Ikemen's on real data (see oracle_test.go).
+var onDecode func(kind string, in []byte, w, h, bpl int, out []byte, err error)
+
+// decode runs the named decoder ("pcx", "rle8", "rle5" or "lz5") through
+// decodeSafe. bpl is only used by "pcx".
+func decode(kind string, in []byte, w, h, bpl int) ([]byte, error) {
+	out, err := decodeSafe(kind, func() []byte {
+		switch kind {
+		case "pcx":
+			return rlePcxDecode(in, w, h, bpl)
+		case "rle8":
+			return rle8Decode(in, w, h)
+		case "rle5":
+			return rle5Decode(in, w, h)
+		case "lz5":
+			return lz5Decode(in, w, h)
+		}
+		panic("unknown decoder " + kind)
+	})
+	if onDecode != nil {
+		onDecode(kind, in, w, h, bpl, out, err)
+	}
+	return out, err
+}
+
 // rlePcxDecode decodes PCX RLE data. bpl is the PCX bytes-per-line value;
 // bpl <= 0 means the data is not compressed and is returned as is.
 func rlePcxDecode(rle []byte, w, h, bpl int) (p []byte) {

@@ -1,0 +1,25 @@
+version 2.0.1.0 sprites 15 palettes 7
+# palette: index group,number colors link hash
+pal 0 0,0 32 -1 c1fce456802f9f2f
+pal 1 0,1 32 -1 a209311407ff9392
+pal 2 0,2 32 -1 1e3bada8245c8239
+pal 3 9000,0 256 -1 fdf3fa072659dd7c
+pal 4 0,3 256 -1 7fa5b151dce1a3a1
+pal 5 0,4 32 -1 538daf10b2ff84bf
+pal 6 0,5 32 -1 076ff2b814f36791
+# sprite: index group,number WxH axis format depth pal link pixels
+spr 0 0,0 99x119 49,0 png32 32 0 -1 9f392dddeac041dc
+spr 1 0,1 101x151 50,150 png32 32 0 -1 7c7c42e174faa15a
+spr 2 0,2 99x119 49,0 png32 32 0 -1 8c963bf8ab0278e6
+spr 3 1,0 172x172 0,0 png32 32 0 -1 d6964c5566bb15a5
+spr 4 1,1 160x640 0,400 png24 24 0 -1 f059477c31ec5e02
+spr 5 2,0 172x132 0,0 lz5 5 1 -1 dd7b66223f64f0ed
+spr 6 3,0 101x151 50,151 png32 32 0 -1 a7fd1e10711d5301
+spr 7 3,1 401x151 200,151 png32 32 0 -1 80f005af4761501a
+spr 8 3,2 516x616 258,357 png32 32 0 -1 553a15b891e31be5
+spr 9 4,0 101x151 50,151 png32 32 0 -1 d5aedcd2bb003752
+spr 10 4,1 401x151 200,151 png32 32 0 -1 2d715c70f816ac8b
+spr 11 4,2 516x616 258,357 png32 32 0 -1 6b49e81ec1ef1286
+spr 12 5,0 108x151 54,75 png32 32 0 -1 c4feff72444ee6a7
+spr 13 5,1 108x151 54,75 png32 32 0 -1 6aa7c1c2aa96c3de
+spr 14 9000,1 240x100 0,0 png32 32 0 -1 aa5d74509d27216a
