@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=KataFighter
+Comment=Character editor for Ikemen GO
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/katafighter %u
+Terminal=false
+Type=Application
+Icon=katafighter
+Categories=Utility;
+StartupWMClass=katafighter
+
+ 

@@ -1,6 +1,6 @@
 # AGENTS.md: KataFighter
 
-KataFighter is an open-source character editor for Ikemen GO, built with Go + Wails v3. Current phase: **Phase 0/1** (foundations + `formats` readers and parsers). See the [roadmap](docs/PLAN.md#7-roadmap).
+KataFighter is an open-source character editor for Ikemen GO, built with Go + Wails v3. Current phase: **Phase 0/1 → 3** (`formats` readers and parsers done; app scaffolded, viewer next). See the [roadmap](docs/PLAN.md#7-roadmap).
 
 This file is the hub. Each fact lives in one file only, and the others link to it. When you work in a folder, read that folder's AGENTS.md too.
 

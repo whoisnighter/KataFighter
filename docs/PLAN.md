@@ -150,8 +150,8 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 ### Phase 0 — Foundations (1–2 weeks)
 - [ ] Repo, MIT license, README, CONTRIBUTING, code of conduct
-- [ ] Go workspace (`go.work`) with `formats`, `lsp`, `app` modules
-- [ ] Wails v3 hello-world app with Svelte + TS, pinned versions
+- [ ] Go workspace (`go.work`) with `formats`, `lsp`, `app` modules (`formats`, `app`, `tools` done; `lsp` not created yet)
+- [x] Wails v3 hello-world app with Svelte + TS, pinned versions (v3.1.0; opens a `.def` and lists its files and problems)
 - [ ] CI: build + test on Windows/macOS/Linux
 - [ ] Collect a **test corpus**: Kung Fu Man + a few license-safe community characters (with permission) + intentionally broken files
 - **Exit criteria:** CI green on all three OSes; app window opens.
@@ -262,6 +262,7 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 3. ~~SFF spike: extract the SFF reader into `formats/sff`, with a CLI that dumps Kung Fu Man's sprites to PNG.~~ Done: v1 + v2, `kf inspect` / `kf dump`.
 4. ~~Build the first golden test: compare decoded sprites with Ikemen output.~~ Done: decoder oracle + hash manifests.
    - ~~AIR reader (`formats/air`) + shared text helpers.~~ Done.
-5. Set up `go.work` with `formats`, `lsp`, `app`; scaffold Wails v3 + Svelte app.
+5. ~~Set up `go.work`; scaffold Wails v3 + Svelte app.~~ Done (`app/`, Wails v3.1.0). `lsp` module still to create.
 6. ~~DEF reader, shared diagnostics model, CNS/ST/CMD and ZSS parsers.~~ Done (`formats/def`, `diag`, `expr`, `cns`, `zss`).
-7. ACT and SND readers; then CI (Phase 0) and the `lsp` module (Phase 2).
+7. Viewer slice (Phase 3): sprite browser, then animation player with Clsn overlay.
+8. ACT and SND readers; CI (Phase 0); the `lsp` module (Phase 2).

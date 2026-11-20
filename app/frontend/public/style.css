@@ -1,0 +1,38 @@
+/* Design tokens. Components use these variables only. */
+:root {
+  --bg: #18181c;
+  --panel: #202026;
+  --panel-2: #2a2a32;
+  --border: #34343e;
+  --text: #e6e6ea;
+  --muted: #9a9aa6;
+  --accent: #e0a33a;
+  --error: #f06a6a;
+  --warning: #e0b44a;
+  --ok: #6ac98a;
+  --radius: 6px;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #app { height: 100%; margin: 0; }
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #1a1408; font-weight: 600; }
+button:disabled { opacity: 0.5; cursor: default; }

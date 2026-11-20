@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>KataFighter</title>
+  <defs>
+    <linearGradient id="strike" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff3d5a"/>
+      <stop offset="1" stop-color="#ff9b3d"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c9d1f2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Editor selection frame -->
+  <rect x="168" y="168" width="688" height="688" fill="none" stroke="#8a93bd" stroke-opacity="0.35" stroke-width="6" stroke-dasharray="20 18"/>
+  <g fill="#e6eaff">
+    <rect x="152" y="152" width="32" height="32" rx="4"/>
+    <rect x="840" y="152" width="32" height="32" rx="4"/>
+    <rect x="152" y="840" width="32" height="32" rx="4"/>
+    <rect x="840" y="840" width="32" height="32" rx="4"/>
+  </g>
+
+  <!-- Hurtbox (blue) around the stem -->
+  <rect x="262" y="236" width="196" height="552" rx="6" fill="#3fa9ff" fill-opacity="0.12" stroke="#3fa9ff" stroke-width="8"/>
+
+  <!-- K: stem -->
+  <rect x="300" y="272" width="120" height="480" rx="14" fill="url(#body)"/>
+  <!-- K: lower leg -->
+  <polygon points="470,560 560,470 802,752 626,752" fill="url(#body)"/>
+  <!-- K: upper arm as a strike -->
+  <polygon points="408,436 580,272 760,272 408,616" fill="url(#strike)"/>
+
+  <!-- Hitbox (red) on the strike -->
+  <rect x="540" y="224" width="260" height="128" rx="6" fill="#ff3d5a" fill-opacity="0.16" stroke="#ff3d5a" stroke-width="8"/>
+</svg>
