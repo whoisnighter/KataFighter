@@ -24,6 +24,7 @@ func main() {
 		Description: "Character editor for Ikemen GO",
 		Services: []application.Service{
 			application.NewService(&services.ProjectService{}),
+			application.NewService(&services.ViewerService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
