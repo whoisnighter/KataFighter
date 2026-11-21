@@ -150,9 +150,9 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 ### Phase 0 — Foundations (1–2 weeks)
 - [ ] Repo, MIT license, README, CONTRIBUTING, code of conduct (code of conduct left)
-- [ ] Go workspace (`go.work`) with `formats`, `lsp`, `app` modules (`formats`, `app`, `tools` done; `lsp` not created yet)
+- [x] Go workspace (`go.work`) with `formats`, `lsp`, `app` modules (plus `tools`)
 - [x] Wails v3 hello-world app with Svelte + TS, pinned versions (v3.1.0; opens a `.def` and lists its files and problems)
-- [ ] CI: build + test on Windows/macOS/Linux (`.github/workflows/ci.yml` added; tick once it is green)
+- [x] CI: build + test on Windows/macOS/Linux (`.github/workflows/ci.yml`)
 - [ ] Collect a **test corpus**: Kung Fu Man + a few license-safe community characters (with permission) + intentionally broken files (KFM via `tools/fetchcorpus` and broken files done; community characters need permission)
 - **Exit criteria:** CI green on all three OSes; app window opens.
 
@@ -165,8 +165,8 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 - **Exit criteria:** every character in the corpus loads without panic; sprite decode matches Ikemen output (pixel-compare golden tests).
 
 ### Phase 2 — `katafighter-lsp` + VS Code extension (3–4 weeks) → **first public release**
-- [ ] Data-driven schema of state controllers, triggers, parameters (incl. Ikemen-only ones)
-- [ ] Diagnostics, completion, hover docs, go-to-definition (state numbers, anim numbers, sound IDs)
+- [x] Data-driven schema of state controllers, triggers, parameters (incl. Ikemen-only ones)
+- [ ] Diagnostics, completion, hover docs, go-to-definition (state numbers, anim numbers, sound IDs) (diagnostics done: parser errors plus unknown controllers, parameters and triggers; mandatory parameters not checked yet)
 - [ ] Document outline (states list), find references
 - [ ] VS Code extension published to Marketplace / Open VSX
 - **Exit criteria:** usable daily for CNS/ZSS editing in VS Code.

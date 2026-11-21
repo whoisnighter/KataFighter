@@ -19,9 +19,9 @@ env:
   WAILS_VERSION: "v3.1.0"
 
 jobs:
-  # Readers, parsers and generators: vet, tests (corpus, golden, oracle).
+  # Readers, parsers, language server and generators: vet, tests (corpus, golden, oracle).
   formats:
-    name: formats + tools (${{ matrix.os }})
+    name: formats + lsp + tools (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -37,6 +37,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: |
             formats/go.sum
+            lsp/go.sum
             tools/go.sum
             app/go.sum
 
@@ -54,11 +55,17 @@ jobs:
       - name: gofmt
         if: runner.os == 'Linux'
         run: |
-          out=$(gofmt -l formats tools)
+          out=$(gofmt -l formats lsp tools)
           if [ -n "$out" ]; then echo "Run gofmt on:"; echo "$out"; exit 1; fi
 
       - name: formats
         working-directory: formats
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: lsp
+        working-directory: lsp
         run: |
           go vet ./...
           go test ./...

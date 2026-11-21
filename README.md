@@ -47,7 +47,7 @@ cd app && wails3 dev
 |---|---|
 | [formats/](formats/AGENTS.md) | `katafighter-formats`: file readers and parsers |
 | [app/](app/AGENTS.md) | Wails v3 desktop app (Go services + Svelte/TypeScript) |
-| [lsp/](lsp/AGENTS.md) | Language server for CNS/ZSS (planned; schema already generated) |
+| [lsp/](lsp/AGENTS.md) | `katafighter-lsp`: language server for CNS/ST/CMD/ZSS (diagnostics so far) |
 | [tools/](tools/AGENTS.md) | Generators and the corpus downloader |
 | [docs/](docs/AGENTS.md) | [Plan](docs/PLAN.md), [upstream audit](docs/upstream-audit.md), logo |
 | [ikemen/](ikemen/AGENTS.md) | Pinned Ikemen GO source (submodule) and the local release build |
