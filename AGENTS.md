@@ -1,6 +1,6 @@
 # AGENTS.md: KataFighter
 
-KataFighter is an open-source character editor for Ikemen GO, built with Go + Wails v3. Current phase: **Phase 0/1 → 3** (`formats` readers and parsers done; sprite browser and animation player done; LSP diagnostics done, completion/hover and Monaco next). See the [roadmap](docs/PLAN.md#7-roadmap).
+KataFighter is an open-source character editor for Ikemen GO, built with Go + Wails v3. Current phase: **Phase 0/1 → 3** (`formats` readers and parsers done; sprite browser and animation player done; Monaco editor with LSP diagnostics done; completion/hover and cross-navigation next). See the [roadmap](docs/PLAN.md#7-roadmap).
 
 This file is the hub. Each fact lives in one file only, and the others link to it. When you work in a folder, read that folder's AGENTS.md too.
 
@@ -11,7 +11,6 @@ This file is the hub. Each fact lives in one file only, and the others link to i
 | [app/](app/AGENTS.md) | Wails v3 desktop app (Go services + Svelte/TS) | UI ↔ core boundary |
 | [formats/](formats/AGENTS.md) | `katafighter-formats`: file readers/writers | Extraction rules, parsing rules |
 | [lsp/](lsp/AGENTS.md) | `katafighter-lsp`: language server | `schema/` (generated) |
-| [vscode-extension/](vscode-extension/AGENTS.md) | VS Code client for the LSP | — |
 | [tools/](tools/AGENTS.md) | Build-time generators (`schemagen`) | Generating `lsp/schema` from Ikemen source |
 | [docs/](docs/AGENTS.md) | Plan, audit, design notes | Vision, roadmap, upstream audit |
 | [ikemen/](ikemen/AGENTS.md) | Ikemen GO source (submodule) + release builds | Pinned engine version, test corpus |
@@ -19,9 +18,9 @@ This file is the hub. Each fact lives in one file only, and the others link to i
 ## Dependency direction
 
 ```
-app ──► formats ◄── lsp ◄── vscode-extension
-           ▲
-           └── code is copied from ikemen/source (never imported)
+app ──► lsp ──► formats ◄── code is copied from ikemen/source (never imported)
+ │               ▲
+ └───────────────┘
 
 ikemen/source ◄──reads── tools/schemagen ──writes──► lsp/schema/ikemen.json
 ```

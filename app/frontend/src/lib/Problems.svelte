@@ -2,7 +2,11 @@
   import Icon from "./Icon.svelte";
   import type { Problem } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
 
-  let { problems, onclose }: { problems: Problem[]; onclose: () => void } = $props();
+  let {
+    problems,
+    onselect,
+    onclose,
+  }: { problems: Problem[]; onselect?: (p: Problem) => void; onclose: () => void } = $props();
 
   function baseName(p: string): string {
     return p.split(/[\\/]/).pop() ?? p;
@@ -19,11 +23,11 @@
       <p class="empty">No problems have been detected in this character.</p>
     {:else}
       {#each problems as p}
-        <div class="row {p.severity}" title={p.file}>
+        <button class="row {p.severity}" title={p.file} onclick={() => onselect?.(p)}>
           <span class="sev"><Icon name={p.severity === "error" ? "error" : p.severity === "warning" ? "warning" : "info"} /></span>
           <span class="msg">{p.message}</span>
           <span class="loc">{baseName(p.file)}{p.line ? ` [Ln ${p.line}${p.col ? `, Col ${p.col}` : ""}]` : ""}</span>
-        </div>
+        </button>
       {/each}
     {/if}
   </div>
@@ -45,7 +49,7 @@
   .action:hover { background: var(--hover); color: var(--text); }
   .list { flex: 1; overflow: auto; padding-bottom: 4px; }
   .empty { margin: 4px 16px; color: var(--muted); }
-  .row { display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 16px; }
+  .row { display: flex; align-items: center; gap: 8px; width: 100%; height: 22px; padding: 0 16px; text-align: left; }
   .row:hover { background: var(--hover); }
   .sev { display: grid; color: var(--muted); }
   .error .sev { color: var(--error); }

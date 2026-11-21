@@ -3,10 +3,30 @@
   import FileIcon, { fileIconFor, type FileIconName } from "./FileIcon.svelte";
   import type { Character, FileInfo } from "../../bindings/github.com/whoisnighter/KataFighter/app/services/models";
 
-  let { character, onclose, onopen }: { character: Character; onclose: () => void; onopen: (role: string) => void } = $props();
+  let {
+    character,
+    activeFile = "",
+    onclose,
+    onopen,
+    onopenfile,
+  }: {
+    character: Character;
+    activeFile?: string;
+    onclose: () => void;
+    onopen: (role: string) => void;
+    onopenfile: (path: string) => void;
+  } = $props();
 
-  // Files with a viewer open it on click; the rest show the overview.
+  // Files with a viewer open it on click, state and command files open in
+  // the code editor, and the rest show the overview.
   const viewable = (f: FileInfo) => !!f.path && (f.role === "sprite" || f.role === "anim");
+  const editable = (f: FileInfo) =>
+    !!f.path && (f.role === "cns" || f.role === "cmd" || f.role === "stcommon" || f.role.startsWith("st["));
+
+  function click(f: FileInfo) {
+    if (editable(f)) onopenfile(f.path);
+    else onopen(viewable(f) ? f.role : "def");
+  }
 
   type Group = { label: string; icon: FileIconName; files: FileInfo[] };
 
@@ -69,8 +89,9 @@
         <button
           class="row file indent"
           class:missing={!f.path}
-          title={`${f.path || "not found"}\n${f.summary}${viewable(f) ? "\nClick to open the viewer" : ""}`}
-          onclick={() => onopen(viewable(f) ? f.role : "def")}
+          class:active={!!f.path && f.path === activeFile}
+          title={`${f.path || "not found"}\n${f.summary}${viewable(f) ? "\nClick to open the viewer" : editable(f) ? "\nClick to edit" : ""}`}
+          onclick={() => click(f)}
         >
           <FileIcon name={fileIconFor(f.role, f.name)} />
           <span class="name">{f.name}</span>
@@ -99,6 +120,7 @@
 
   .row { display: flex; align-items: center; gap: 6px; width: 100%; height: 22px; padding: 0 12px 0 20px; text-align: left; }
   .row:hover { background: var(--hover); }
+  .row.active { background: var(--selection); }
   .group { color: var(--muted); font-size: var(--small); padding-left: 14px; }
   .chev { display: grid; place-items: center; transition: transform 0.1s; }
   .chev.open { transform: rotate(90deg); }

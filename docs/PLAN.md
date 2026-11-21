@@ -48,7 +48,7 @@ KataFighter aims to be a modern, cross-platform, open-source studio for creating
 | Code editor | Monaco Editor | Same core as VS Code; connects to our LSP |
 | Sprite / hitbox canvas | HTML Canvas 2D → WebGL (PixiJS) later | Pixel-perfect zoom, nearest-neighbour scaling |
 | Styling | CSS variables + a small component kit | Theming via tokens |
-| Language server | Go, LSP protocol | Reused by editor and a VS Code extension |
+| Language server | Go, LSP protocol | Used by the app's Monaco editor; no separate editor extension |
 | Build / CI | GitHub Actions | Windows / macOS / Linux matrix |
 | Packaging | Wails v3 packaging (NSIS/MSI, .app/.dmg, AppImage/.deb) | Code signing later |
 | Testing | Go `testing` + golden files; Vitest + Playwright for frontend | |
@@ -103,7 +103,6 @@ KataFighter/
 │  ├─ main.go
 │  ├─ services/                 # project, sprite, anim, code, sound, test
 │  └─ frontend/                 # Svelte + TS
-├─ vscode-extension/            # thin client for katafighter-lsp
 ├─ docs/                        # this plan, upstream audit, design notes
 └─ ikemen/                      # Ikemen GO reference material (not built)
    ├─ source/                   # git submodule, pinned tag (v1.0.0)
@@ -164,18 +163,18 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 - [x] CLI `kf inspect <char.def>` for debugging
 - **Exit criteria:** every character in the corpus loads without panic; sprite decode matches Ikemen output (pixel-compare golden tests).
 
-### Phase 2 — `katafighter-lsp` + VS Code extension (3–4 weeks) → **first public release**
+### Phase 2 — `katafighter-lsp` (3–4 weeks)
 - [x] Data-driven schema of state controllers, triggers, parameters (incl. Ikemen-only ones)
 - [ ] Diagnostics, completion, hover docs, go-to-definition (state numbers, anim numbers, sound IDs) (diagnostics done: parser errors plus unknown controllers, parameters and triggers; mandatory parameters not checked yet)
 - [ ] Document outline (states list), find references
-- [ ] VS Code extension published to Marketplace / Open VSX
-- **Exit criteria:** usable daily for CNS/ZSS editing in VS Code.
+- **Exit criteria:** usable daily for CNS/ZSS editing in the app's Monaco editor (Phase 3).
+- No VS Code extension: the app is the only client. Other editors can still run `katafighter-lsp` over stdio.
 
-### Phase 3 — Editor MVP: viewer (3–4 weeks)
+### Phase 3 — Editor MVP: viewer (3–4 weeks) → **first public release**
 - [x] Open project from `.def`; project tree
 - [x] Sprite browser (group/index grid, zoom, axis display, palette switch with the DEF's ACT files and the SFF's palettes)
 - [x] Animation player (play/pause/step, loop, Clsn overlay, onion skin; blend modes approximated on canvas)
-- [ ] Monaco editor wired to the LSP for CNS/ST/CMD/ZSS
+- [x] Monaco editor wired to the LSP for CNS/ST/CMD/ZSS (diagnostics as you type, Problems panel jumps to the line, save; through `EditorService` calling `lsp/check`)
 - [ ] Cross-navigation: click `anim = 200` → opens action 200
 - **Exit criteria:** a creator can browse any corpus character comfortably.
 
@@ -225,7 +224,7 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 
 - GitHub Issues with labels: `formats`, `lsp`, `ui`, `good first issue`, `help wanted`.
 - GitHub Projects board mirroring the phases above.
-- Discussions for feature requests; announce on MugenGuild and the Ikemen GO Discord after Phase 2.
+- Discussions for feature requests; announce on MugenGuild and the Ikemen GO Discord after Phase 3.
 - Semantic versioning; CHANGELOG.md with Keep a Changelog format.
 - Docs site (later): user guide + format reference.
 
@@ -262,7 +261,9 @@ Each phase ends with a tagged release. Time estimates assume one part-time devel
 3. ~~SFF spike: extract the SFF reader into `formats/sff`, with a CLI that dumps Kung Fu Man's sprites to PNG.~~ Done: v1 + v2, `kf inspect` / `kf dump`.
 4. ~~Build the first golden test: compare decoded sprites with Ikemen output.~~ Done: decoder oracle + hash manifests.
    - ~~AIR reader (`formats/air`) + shared text helpers.~~ Done.
-5. ~~Set up `go.work`; scaffold Wails v3 + Svelte app.~~ Done (`app/`, Wails v3.1.0). `lsp` module still to create.
+5. ~~Set up `go.work`; scaffold Wails v3 + Svelte app.~~ Done (`app/`, Wails v3.1.0).
 6. ~~DEF reader, shared diagnostics model, CNS/ST/CMD and ZSS parsers.~~ Done (`formats/def`, `diag`, `expr`, `cns`, `zss`).
-7. Viewer slice (Phase 3): sprite browser, then animation player with Clsn overlay.
-8. ACT and SND readers; CI (Phase 0); the `lsp` module (Phase 2).
+7. ~~Viewer slice (Phase 3): sprite browser, then animation player with Clsn overlay.~~ Done.
+8. ~~ACT and SND readers; CI (Phase 0); the `lsp` module (Phase 2).~~ Done (LSP: diagnostics).
+9. ~~Monaco editor in the app with the LSP diagnostics (Phase 3).~~ Done.
+10. Completion, hover and go-to-definition (Phase 2), shown in the Monaco editor; then cross-navigation (Phase 3).

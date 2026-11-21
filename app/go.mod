@@ -5,6 +5,7 @@ go 1.27
 require (
 	github.com/wailsapp/wails/v3 v3.1.0
 	github.com/whoisnighter/KataFighter/formats v0.0.0-20261120015610-b5dc533f770c
+	github.com/whoisnighter/KataFighter/lsp v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -17,4 +18,7 @@ require (
 	golang.org/x/text v0.42.0 // indirect
 )
 
-replace github.com/whoisnighter/KataFighter/formats => ../formats
+replace (
+	github.com/whoisnighter/KataFighter/formats => ../formats
+	github.com/whoisnighter/KataFighter/lsp => ../lsp
+)

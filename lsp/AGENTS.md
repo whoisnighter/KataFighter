@@ -1,8 +1,8 @@
 # lsp/: katafighter-lsp
 
-↑ [Root](../AGENTS.md) · Roadmap: [Phase 2](../docs/PLAN.md#phase-2--katafighter-lsp--vs-code-extension-34-weeks--first-public-release)
+↑ [Root](../AGENTS.md) · Roadmap: [Phase 2](../docs/PLAN.md#phase-2--katafighter-lsp-34-weeks)
 
-Go module `github.com/whoisnighter/KataFighter/lsp`. Language server for CNS/ST/CMD/ZSS. Clients: [vscode-extension/](../vscode-extension/AGENTS.md) and [app/](../app/AGENTS.md) (Monaco). Done so far: diagnostics. Next: completion, hover, go-to-definition.
+Go module `github.com/whoisnighter/KataFighter/lsp`. Language server for CNS/ST/CMD/ZSS. Client: [app/](../app/AGENTS.md) (Monaco). There is no VS Code extension; other editors can run the binary over stdio. Done so far: diagnostics. Next: completion, hover, go-to-definition.
 
 ## Rules
 
@@ -17,7 +17,8 @@ Go module `github.com/whoisnighter/KataFighter/lsp`. Language server for CNS/ST/
 |---|---|
 | `schema/` | Embeds `ikemen.json` and looks up controllers, parameters and triggers (`projhit1200` resolves to `projhit`) |
 | `check/` | Checks names that the parsers leave to the LSP: unknown controller type (error), unknown parameter (warning; skipped for controllers with `unresolved` keys), unknown trigger (error). `Text` = parser + schema diagnostics for one file, by extension |
-| `server/` | LSP over a byte stream: initialize/shutdown/exit, full text sync, `publishDiagnostics`. Converts byte columns to UTF-16 |
+| `server/` | LSP over a byte stream: initialize/shutdown/exit, full text sync, `publishDiagnostics` |
+| `textpos/` | Converts diagnostic positions (byte columns) to editor positions (UTF-16), for the server and the app's Monaco editor |
 | `cmd/katafighter-lsp/` | The binary: stdio transport, logs to stderr, `-version` |
 
 Trigger names that are deliberately not checked, because Ikemen reads them per trigger and the schema does not say how:

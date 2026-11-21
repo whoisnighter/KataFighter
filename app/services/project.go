@@ -1,6 +1,6 @@
 // Package services holds the Go side of the app. The frontend reaches it
 // only through the generated Wails bindings; all format logic comes from
-// katafighter-formats.
+// katafighter-formats, and code checks from katafighter-lsp.
 package services
 
 import (
@@ -18,6 +18,8 @@ import (
 	"github.com/whoisnighter/KataFighter/formats/sff"
 	"github.com/whoisnighter/KataFighter/formats/snd"
 	"github.com/whoisnighter/KataFighter/formats/zss"
+	"github.com/whoisnighter/KataFighter/lsp/check"
+	"github.com/whoisnighter/KataFighter/lsp/schema"
 )
 
 // ProjectService opens a character from its DEF file.
@@ -181,6 +183,7 @@ func (c *Character) loadText(p string) string {
 			return "error: " + err.Error()
 		}
 		c.addProblems(f.Diagnostics)
+		c.addProblems(check.ZSS(f, schema.Default()))
 		return fmt.Sprintf("ZSS, %d states, %d functions", len(f.States), len(f.Functions))
 	}
 	f, err := cns.Load(p)
@@ -188,6 +191,7 @@ func (c *Character) loadText(p string) string {
 		return "error: " + err.Error()
 	}
 	c.addProblems(f.Diagnostics)
+	c.addProblems(check.CNS(f, schema.Default()))
 	ctrls := 0
 	for _, s := range f.States {
 		ctrls += len(s.Controllers)

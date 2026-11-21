@@ -16,6 +16,7 @@ import (
 	"github.com/whoisnighter/KataFighter/formats/diag"
 	"github.com/whoisnighter/KataFighter/lsp/check"
 	"github.com/whoisnighter/KataFighter/lsp/schema"
+	"github.com/whoisnighter/KataFighter/lsp/textpos"
 )
 
 // Name and Version are reported to the client in initialize.
@@ -213,8 +214,8 @@ func (s *Server) didChange(raw json.RawMessage) error {
 	var p struct {
 		TextDocument   versionedDoc `json:"textDocument"`
 		ContentChanges []struct {
-			Range *Range `json:"range"`
-			Text  string `json:"text"`
+			Range *textpos.Range `json:"range"`
+			Text  string         `json:"text"`
 		} `json:"contentChanges"`
 	}
 	if err := json.Unmarshal(raw, &p); err != nil {
@@ -253,11 +254,11 @@ func (s *Server) didClose(raw json.RawMessage) error {
 
 // Diagnostic is the LSP diagnostic shape.
 type Diagnostic struct {
-	Range    Range  `json:"range"`
-	Severity int    `json:"severity"`
-	Code     string `json:"code,omitempty"`
-	Source   string `json:"source"`
-	Message  string `json:"message"`
+	Range    textpos.Range `json:"range"`
+	Severity int           `json:"severity"`
+	Code     string        `json:"code,omitempty"`
+	Source   string        `json:"source"`
+	Message  string        `json:"message"`
 }
 
 func (s *Server) publish(d *document) {
@@ -272,10 +273,10 @@ func (s *Server) diagnostics(d *document) []Diagnostic {
 	if d.kind == check.KindNone {
 		return out
 	}
-	ls := lines(d.text)
+	ls := textpos.Lines(d.text)
 	for _, x := range check.Text(d.kind, d.text, s.schema) {
 		out = append(out, Diagnostic{
-			Range:    toRange(ls, x.Range),
+			Range:    textpos.ToRange(ls, x.Range),
 			Severity: severity(x.Severity),
 			Code:     x.Code,
 			Source:   "katafighter",
